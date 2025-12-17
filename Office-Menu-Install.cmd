@@ -29,13 +29,14 @@ echo      [4] Installation avec fichier config personnalise
 echo.
 echo      [5] Activer Office uniquement (deja installe)
 echo      [6] Verifier le statut d'activation
+echo      [7] Desactiver telemetrie et recommandations
 echo.
 echo      [0] Quitter
 echo.
 echo  ============================================================
 echo.
 
-set /p choice="  Votre choix [0-6]: "
+set /p choice="  Votre choix [0-7]: "
 
 if "%choice%"=="1" goto install_365
 if "%choice%"=="2" goto install_2021
@@ -43,6 +44,7 @@ if "%choice%"=="3" goto install_2019
 if "%choice%"=="4" goto install_custom
 if "%choice%"=="5" goto activate_only
 if "%choice%"=="6" goto check_status
+if "%choice%"=="7" goto disable_telemetry
 if "%choice%"=="0" goto end
 
 echo  [ERROR] Choix invalide
@@ -171,6 +173,12 @@ echo.
 echo [OK] Activation terminee
 echo.
 
+:: Disable telemetry
+call :run_telemetry_disable
+echo.
+echo [OK] Telemetrie desactivee
+echo.
+
 pause
 goto menu
 
@@ -240,6 +248,43 @@ if exist "%TEMP%\Ohook-Activate.cmd" (
 ) else (
     echo [ERROR] Echec du telechargement du script Ohook
     echo         URL: %OHOOK_SCRIPT_URL%
+)
+goto :eof
+
+:: ============================================================================
+:: DISABLE TELEMETRY (menu option)
+:: ============================================================================
+:disable_telemetry
+cls
+echo.
+echo [INFO] Desactivation de la telemetrie et des recommandations...
+echo.
+
+call :run_telemetry_disable
+
+echo.
+echo [OK] Telemetrie et recommandations desactivees
+echo.
+pause
+goto menu
+
+:: ============================================================================
+:: RUN TELEMETRY DISABLE FROM WEB
+:: ============================================================================
+:run_telemetry_disable
+echo [INFO] Telechargement du script de desactivation...
+
+set "TELEMETRY_SCRIPT_URL=METTRE_URL_DU_SCRIPT_TELEMETRY_ICI"
+
+powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('%TELEMETRY_SCRIPT_URL%', '%TEMP%\Disable-Telemetry.cmd')" 2>nul
+
+if exist "%TEMP%\Disable-Telemetry.cmd" (
+    echo [OK] Script telecharge
+    call "%TEMP%\Disable-Telemetry.cmd"
+    del /f /q "%TEMP%\Disable-Telemetry.cmd" 2>nul
+) else (
+    echo [ERROR] Echec du telechargement du script
+    echo         URL: %TELEMETRY_SCRIPT_URL%
 )
 goto :eof
 
