@@ -41,9 +41,15 @@ if "%SILENT%"=="0" echo [INFO] Demarrage de l'activation Ohook...
 mkdir "%TEMP_DIR%" 2>nul
 
 :: Download DLLs
-if "%SILENT%"=="0" echo [INFO] Telechargement des DLL...
-powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('%DLL64_URL%', '%TEMP_DIR%\sppc64.dll')" 2>nul
-powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('%DLL32_URL%', '%TEMP_DIR%\sppc32.dll')" 2>nul
+if "%SILENT%"=="0" (
+    echo [INFO] Telechargement sppc64.dll...
+    powershell -Command "$ProgressPreference = 'Continue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $wc = New-Object Net.WebClient; $wc.DownloadProgressChanged += { Write-Host -NoNewline \"`r       Progress: $($_.ProgressPercentage)%% - $([math]::Round($_.BytesReceived/1KB, 0)) KB\" }; $wc.DownloadFileAsync([Uri]'%DLL64_URL%', '%TEMP_DIR%\sppc64.dll'); while ($wc.IsBusy) { Start-Sleep -Milliseconds 100 }; Write-Host ''"
+    echo [INFO] Telechargement sppc32.dll...
+    powershell -Command "$ProgressPreference = 'Continue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $wc = New-Object Net.WebClient; $wc.DownloadProgressChanged += { Write-Host -NoNewline \"`r       Progress: $($_.ProgressPercentage)%% - $([math]::Round($_.BytesReceived/1KB, 0)) KB\" }; $wc.DownloadFileAsync([Uri]'%DLL32_URL%', '%TEMP_DIR%\sppc32.dll'); while ($wc.IsBusy) { Start-Sleep -Milliseconds 100 }; Write-Host ''"
+) else (
+    powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('%DLL64_URL%', '%TEMP_DIR%\sppc64.dll')" 2>nul
+    powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('%DLL32_URL%', '%TEMP_DIR%\sppc32.dll')" 2>nul
+)
 
 if not exist "%TEMP_DIR%\sppc64.dll" (
     if "%SILENT%"=="0" echo [ERREUR] Echec telechargement sppc64.dll

@@ -78,7 +78,7 @@ echo [INFO] Downloading Office Deployment Tool...
 
 set "ODT_URL=https://officecdn.microsoft.com/pr/wsus/setup.exe"
 
-powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('%ODT_URL%', '%ODT_EXE%')" 2>nul
+powershell -Command "$ProgressPreference = 'Continue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $wc = New-Object Net.WebClient; $wc.DownloadProgressChanged += { Write-Host -NoNewline \"`r       Progress: $($_.ProgressPercentage)%% - $([math]::Round($_.BytesReceived/1MB, 2)) MB\" }; $wc.DownloadFileAsync([Uri]'%ODT_URL%', '%ODT_EXE%'); while ($wc.IsBusy) { Start-Sleep -Milliseconds 100 }; Write-Host ''"
 
 if not exist "%ODT_EXE%" (
     echo [ERROR] Failed to download Office Deployment Tool
@@ -186,7 +186,7 @@ echo.
 set "OHOOK_SCRIPT_URL=METTRE_URL_DU_SCRIPT_OHOOK_ICI"
 
 echo [INFO] Downloading Ohook activation script...
-powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('%OHOOK_SCRIPT_URL%', '%TEMP%\Ohook-Activate.cmd')" 2>nul
+powershell -Command "$ProgressPreference = 'Continue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $wc = New-Object Net.WebClient; $wc.DownloadProgressChanged += { Write-Host -NoNewline \"`r       Progress: $($_.ProgressPercentage)%%\" }; $wc.DownloadFileAsync([Uri]'%OHOOK_SCRIPT_URL%', '%TEMP%\Ohook-Activate.cmd'); while ($wc.IsBusy) { Start-Sleep -Milliseconds 100 }; Write-Host ''" 2>nul
 
 if exist "%TEMP%\Ohook-Activate.cmd" (
     echo [OK] Script downloaded
@@ -241,7 +241,8 @@ echo.
 :: Download and execute telemetry disable script from web
 set "TELEMETRY_SCRIPT_URL=METTRE_URL_DU_SCRIPT_TELEMETRY_ICI"
 
-powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('%TELEMETRY_SCRIPT_URL%', '%TEMP%\Disable-Telemetry.cmd')" 2>nul
+echo [INFO] Downloading telemetry disable script...
+powershell -Command "$ProgressPreference = 'Continue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $wc = New-Object Net.WebClient; $wc.DownloadProgressChanged += { Write-Host -NoNewline \"`r       Progress: $($_.ProgressPercentage)%%\" }; $wc.DownloadFileAsync([Uri]'%TELEMETRY_SCRIPT_URL%', '%TEMP%\Disable-Telemetry.cmd'); while ($wc.IsBusy) { Start-Sleep -Milliseconds 100 }; Write-Host ''" 2>nul
 
 if exist "%TEMP%\Disable-Telemetry.cmd" (
     echo [OK] Telemetry script downloaded

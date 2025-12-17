@@ -39,9 +39,30 @@ Write-Host ""
 try {
     Write-Host "[*] Telechargement du script d'installation..." -ForegroundColor Cyan
     $scriptPath = "$env:TEMP\Office-Install-Activate.cmd"
+    $url = "$BaseURL/Office-Install-Activate.cmd"
 
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    (New-Object Net.WebClient).DownloadFile("$BaseURL/Office-Install-Activate.cmd", $scriptPath)
+
+    # Download with progress
+    $wc = New-Object Net.WebClient
+    $downloadComplete = $false
+
+    Register-ObjectEvent -InputObject $wc -EventName DownloadProgressChanged -Action {
+        $percent = $EventArgs.ProgressPercentage
+        $received = [math]::Round($EventArgs.BytesReceived / 1KB, 0)
+        Write-Host -NoNewline "`r       Progress: $percent% - $received KB"
+    } | Out-Null
+
+    Register-ObjectEvent -InputObject $wc -EventName DownloadFileCompleted -Action {
+        $global:downloadComplete = $true
+    } | Out-Null
+
+    $wc.DownloadFileAsync([Uri]$url, $scriptPath)
+
+    while (-not $global:downloadComplete) {
+        Start-Sleep -Milliseconds 100
+    }
+    Write-Host ""
 
     if (Test-Path $scriptPath) {
         Write-Host "[OK] Script telecharge" -ForegroundColor Green
