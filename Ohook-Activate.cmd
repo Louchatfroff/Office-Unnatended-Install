@@ -121,7 +121,7 @@ if not exist "%TEMP_DIR%" mkdir "%TEMP_DIR%"
 
 :: Download 64-bit DLL
 echo [INFO] Telechargement sppc64.dll...
-powershell -Command "& {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('%DLL64_URL%', '%DLL64_PATH%')}" 2>nul
+powershell -Command "$ProgressPreference = 'Continue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $wc = New-Object Net.WebClient; $wc.DownloadProgressChanged += { Write-Host -NoNewline \"`r       Progress: $($_.ProgressPercentage)%% - $([math]::Round($_.BytesReceived/1KB, 0)) KB\" }; $wc.DownloadFileAsync([Uri]'%DLL64_URL%', '%DLL64_PATH%'); while ($wc.IsBusy) { Start-Sleep -Milliseconds 100 }; Write-Host ''"
 
 if not exist "%DLL64_PATH%" (
     echo [ERREUR] Echec du telechargement de sppc64.dll
@@ -134,7 +134,7 @@ echo [OK] sppc64.dll telecharge
 
 :: Download 32-bit DLL
 echo [INFO] Telechargement sppc32.dll...
-powershell -Command "& {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('%DLL32_URL%', '%DLL32_PATH%')}" 2>nul
+powershell -Command "$ProgressPreference = 'Continue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $wc = New-Object Net.WebClient; $wc.DownloadProgressChanged += { Write-Host -NoNewline \"`r       Progress: $($_.ProgressPercentage)%% - $([math]::Round($_.BytesReceived/1KB, 0)) KB\" }; $wc.DownloadFileAsync([Uri]'%DLL32_URL%', '%DLL32_PATH%'); while ($wc.IsBusy) { Start-Sleep -Milliseconds 100 }; Write-Host ''"
 
 if not exist "%DLL32_PATH%" (
     echo [ERREUR] Echec du telechargement de sppc32.dll
