@@ -2,7 +2,7 @@
 
 Scripts pour installer et activer Microsoft Office de manière automatique (unattended).
 
-Basé sur [Microsoft Activation Scripts (MAS)](https://massgrave.dev) - méthode Ohook.
+Basé sur [ohook par asdcorp](https://github.com/asdcorp/ohook) pour l'activation.
 
 ## Scripts disponibles
 
@@ -10,6 +10,8 @@ Basé sur [Microsoft Activation Scripts (MAS)](https://massgrave.dev) - méthode
 |--------|-------------|
 | `Office-Install-Activate.cmd` | Installation automatique complète (configurable) |
 | `Office-Menu-Install.cmd` | Version interactive avec menu |
+| `Ohook-Activate.cmd` | Activation uniquement (version détaillée) |
+| `Ohook-Activate-Silent.cmd` | Activation uniquement (version silencieuse) |
 | `config-office365.xml` | Configuration pour Office 365 |
 | `config-office2021.xml` | Configuration pour Office 2021 LTSC |
 
@@ -26,6 +28,34 @@ Basé sur [Microsoft Activation Scripts (MAS)](https://massgrave.dev) - méthode
 1. **Clic droit** sur `Office-Menu-Install.cmd`
 2. Sélectionner **"Exécuter en tant qu'administrateur"**
 3. Choisir l'option désirée dans le menu
+
+### Activation uniquement
+
+Si Office est déjà installé :
+
+```batch
+:: Version détaillée avec logs
+Ohook-Activate.cmd
+
+:: Version silencieuse
+Ohook-Activate-Silent.cmd
+
+:: Version silencieuse avec logs
+Ohook-Activate-Silent.cmd /log
+```
+
+## Comment fonctionne Ohook
+
+Ohook fonctionne en plaçant un fichier `sppc.dll` personnalisé dans le dossier Office. Ce fichier intercepte les appels de vérification d'activation et retourne toujours que Office est activé.
+
+**Avantages :**
+- Ne modifie pas les fichiers système Windows
+- Survit aux mises à jour Office
+- Ne nécessite pas de serveur KMS
+
+**Fichiers utilisés :**
+- `sppc64.dll` (64-bit) - SHA256: `393a1fa26deb3663854e41f2b687c188a9eacd87b23f17ea09422c4715cb5a9f`
+- `sppc32.dll` (32-bit) - SHA256: `09865ea5993215965e8f27a74b8a41d15fd0f60f5f404cb7a8b3c7757acdab02`
 
 ## Configuration
 
@@ -74,22 +104,14 @@ set "EXCLUDE_APPS=Publisher,Access,OneDrive,Teams"
 :: PowerPoint, Publisher, Word, Teams
 ```
 
-## Activation uniquement
+### Modifier l'URL des DLL Ohook
 
-Si Office est déjà installé, vous pouvez l'activer avec :
+Dans `Ohook-Activate.cmd` ou `Ohook-Activate-Silent.cmd` :
 
-### Méthode 1 : Via le menu
-Lancez `Office-Menu-Install.cmd` et choisissez l'option 5.
-
-### Méthode 2 : Commande PowerShell directe
-```powershell
-irm https://get.activated.win | iex
-```
-Puis sélectionner "Ohook" dans le menu.
-
-### Méthode 3 : Activation silencieuse
-```powershell
-& ([ScriptBlock]::Create((irm https://get.activated.win))) /Ohook /S
+```batch
+set "OHOOK_VERSION=0.5"
+set "DLL64_URL=https://github.com/asdcorp/ohook/releases/download/%OHOOK_VERSION%/sppc64.dll"
+set "DLL32_URL=https://github.com/asdcorp/ohook/releases/download/%OHOOK_VERSION%/sppc32.dll"
 ```
 
 ## Prérequis
@@ -114,22 +136,33 @@ Puis sélectionner "Ohook" dans le menu.
 ## Dépannage
 
 ### L'activation échoue
-Visitez : https://massgrave.dev/troubleshoot
+
+1. Fermez toutes les applications Office
+2. Relancez le script d'activation en administrateur
+3. Redémarrez l'ordinateur et réessayez
 
 ### Vérifier le statut d'activation
+
 ```cmd
-cscript "%ProgramFiles%\Microsoft Office\Office16\OSPP.VBS" /dstatus
+cscript "%ProgramFiles%\Microsoft Office\root\Office16\OSPP.VBS" /dstatus
 ```
 
 ### Réinstaller proprement
+
 1. Désinstaller Office via les paramètres Windows
 2. Utiliser [Office Removal Tool](https://aka.ms/SaRA-OfficeUninstallFromPC)
 3. Relancer le script d'installation
 
-## Crédits
+### Les DLL ne se téléchargent pas
 
-- [Microsoft Activation Scripts (MAS)](https://github.com/massgravel/Microsoft-Activation-Scripts)
-- [Office Deployment Tool](https://docs.microsoft.com/deployoffice/overview-office-deployment-tool)
+Vérifiez que GitHub n'est pas bloqué sur votre réseau. Vous pouvez télécharger manuellement les DLL depuis :
+- https://github.com/asdcorp/ohook/releases
+
+## Sources
+
+- [ohook par asdcorp](https://github.com/asdcorp/ohook) - Code source des DLL d'activation
+- [Office Deployment Tool](https://docs.microsoft.com/deployoffice/overview-office-deployment-tool) - Outil d'installation Office
+- [MAS Documentation](https://massgrave.dev/ohook) - Documentation sur Ohook
 
 ## Avertissement
 
