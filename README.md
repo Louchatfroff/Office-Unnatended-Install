@@ -13,8 +13,8 @@ Basé sur [ohook par asdcorp](https://github.com/asdcorp/ohook) pour l'activatio
 | `Ohook-Activate.cmd` | Activation uniquement (version détaillée) |
 | `Ohook-Activate-Silent.cmd` | Activation uniquement (version silencieuse) |
 | `Disable-Telemetry.cmd` | Désactive télémétrie Windows/Office/Edge + recommandations |
-| `config-office365.xml` | Configuration pour Office 365 |
-| `config-office2021.xml` | Configuration pour Office 2021 LTSC |
+
+> **Note:** La configuration XML est générée automatiquement dans le dossier temporaire à chaque exécution. Aucun fichier supplémentaire n'est nécessaire.
 
 ## Utilisation rapide
 

@@ -116,19 +116,16 @@ goto do_install
 :: COMMON INSTALLATION LOGIC
 :: ============================================================================
 :do_install
-set "WORK_DIR=%~dp0"
-set "ODT_DIR=%WORK_DIR%ODT"
-set "ODT_EXE=%ODT_DIR%\setup.exe"
-set "CONFIG_FILE=%ODT_DIR%\config.xml"
+set "WORK_DIR=%TEMP%\OfficeInstall_%RANDOM%"
+set "ODT_EXE=%WORK_DIR%\setup.exe"
+set "CONFIG_FILE=%WORK_DIR%\config.xml"
 
-:: Create directory
-if not exist "%ODT_DIR%" mkdir "%ODT_DIR%"
+:: Create temp directory
+if not exist "%WORK_DIR%" mkdir "%WORK_DIR%"
 
 :: Download ODT
 echo [INFO] Telechargement de Office Deployment Tool...
-if not exist "%ODT_EXE%" (
-    powershell -Command "& {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('https://officecdn.microsoft.com/pr/wsus/setup.exe', '%ODT_EXE%')}"
-)
+powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('https://officecdn.microsoft.com/pr/wsus/setup.exe', '%ODT_EXE%')"
 
 if not exist "%ODT_EXE%" (
     echo [ERROR] Echec du telechargement de ODT
@@ -149,7 +146,7 @@ if defined USE_CUSTOM (
 echo [INFO] Telechargement des fichiers Office...
 echo        Cela peut prendre plusieurs minutes...
 echo.
-cd /d "%ODT_DIR%"
+cd /d "%WORK_DIR%"
 "%ODT_EXE%" /download "%CONFIG_FILE%"
 echo.
 echo [OK] Telechargement termine
@@ -177,6 +174,12 @@ echo.
 call :run_telemetry_disable
 echo.
 echo [OK] Telemetrie desactivee
+echo.
+
+:: Cleanup temp directory
+echo [INFO] Nettoyage des fichiers temporaires...
+rd /s /q "%WORK_DIR%" 2>nul
+echo [OK] Nettoyage termine
 echo.
 
 pause
