@@ -4,6 +4,20 @@ Scripts pour installer et activer Microsoft Office de manière automatique (unat
 
 Basé sur [ohook par asdcorp](https://github.com/asdcorp/ohook) pour l'activation.
 
+## Utilisation rapide (Recommandé)
+
+Ouvrez PowerShell et exécutez :
+
+```powershell
+irm https://VOTRE-URL.vercel.app | iex
+```
+
+Ou avec l'URL GitHub directe :
+
+```powershell
+irm https://raw.githubusercontent.com/Louchatfroff/Office-Unnatended-Install/main/start.ps1 | iex
+```
+
 ## Scripts disponibles
 
 | Script | Description |
