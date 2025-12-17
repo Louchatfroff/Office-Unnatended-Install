@@ -31,10 +31,10 @@ set "OFFICE_CHANNEL=Current"
 :: Exclude apps (comma separated): Access,Excel,OneDrive,OneNote,Outlook,PowerPoint,Publisher,Word,Teams
 set "EXCLUDE_APPS=Publisher,Access,OneDrive,Teams"
 
-:: Working directory
-set "WORK_DIR=%~dp0"
-set "ODT_DIR=%WORK_DIR%ODT"
-set "CONFIG_FILE=%ODT_DIR%\config.xml"
+:: Working directory (temp)
+set "WORK_DIR=%TEMP%\OfficeInstall_%RANDOM%"
+set "ODT_EXE=%WORK_DIR%\setup.exe"
+set "CONFIG_FILE=%WORK_DIR%\config.xml"
 
 :: ============================================================================
 :: CHECK ADMIN PRIVILEGES
@@ -60,13 +60,13 @@ echo [OK] Running with Administrator privileges
 echo.
 
 :: ============================================================================
-:: CREATE WORKING DIRECTORY
+:: CREATE TEMP DIRECTORY
 :: ============================================================================
 
 :create_dirs
-echo [INFO] Creating working directories...
-if not exist "%ODT_DIR%" mkdir "%ODT_DIR%"
-echo [OK] Working directory: %ODT_DIR%
+echo [INFO] Creating temp directory...
+if not exist "%WORK_DIR%" mkdir "%WORK_DIR%"
+echo [OK] Temp directory: %WORK_DIR%
 echo.
 
 :: ============================================================================
@@ -77,18 +77,14 @@ echo.
 echo [INFO] Downloading Office Deployment Tool...
 
 set "ODT_URL=https://officecdn.microsoft.com/pr/wsus/setup.exe"
-set "ODT_EXE=%ODT_DIR%\setup.exe"
 
-if exist "%ODT_EXE%" (
-    echo [INFO] ODT already exists, skipping download...
-) else (
-    powershell -Command "& {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('%ODT_URL%', '%ODT_EXE%')}" 2>nul
-    if not exist "%ODT_EXE%" (
-        echo [ERROR] Failed to download Office Deployment Tool
-        echo         Please check your internet connection
-        pause
-        exit /b 1
-    )
+powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('%ODT_URL%', '%ODT_EXE%')" 2>nul
+
+if not exist "%ODT_EXE%" (
+    echo [ERROR] Failed to download Office Deployment Tool
+    echo         Please check your internet connection
+    pause
+    exit /b 1
 )
 
 echo [OK] Office Deployment Tool ready
@@ -150,7 +146,7 @@ echo [INFO] Downloading Office installation files...
 echo        This may take several minutes depending on your connection...
 echo.
 
-cd /d "%ODT_DIR%"
+cd /d "%WORK_DIR%"
 "%ODT_EXE%" /download "%CONFIG_FILE%"
 
 if %errorlevel% neq 0 (
@@ -238,8 +234,8 @@ echo.
 :cleanup
 echo [INFO] Cleaning up temporary files...
 
-:: Uncomment the following line to remove downloaded files after installation
-:: rd /s /q "%ODT_DIR%\Office" 2>nul
+:: Remove temp directory
+rd /s /q "%WORK_DIR%" 2>nul
 
 echo [OK] Cleanup complete
 echo.
