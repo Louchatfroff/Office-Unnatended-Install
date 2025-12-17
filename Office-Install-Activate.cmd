@@ -97,36 +97,26 @@ echo.
 :create_config
 echo [INFO] Creating Office configuration file...
 
-:: Build ExcludeApp XML elements
-set "EXCLUDE_XML="
-for %%a in (%EXCLUDE_APPS%) do (
-    set "EXCLUDE_XML=!EXCLUDE_XML!        <ExcludeApp ID="%%a" />^
-
-"
-)
-
 :: Create the configuration XML
-(
-echo ^<Configuration^>
-echo   ^<Add OfficeClientEdition="%OFFICE_ARCH%" Channel="%OFFICE_CHANNEL%"^>
-echo     ^<Product ID="%OFFICE_PRODUCT%"^>
-echo       ^<Language ID="%OFFICE_LANG%" /^>
-echo       ^<Language ID="MatchOS" /^>
-echo %EXCLUDE_XML%
-echo     ^</Product^>
-echo   ^</Add^>
-echo   ^<Property Name="SharedComputerLicensing" Value="0" /^>
-echo   ^<Property Name="FORCEAPPSHUTDOWN" Value="TRUE" /^>
-echo   ^<Property Name="DeviceBasedLicensing" Value="0" /^>
-echo   ^<Property Name="SCLCacheOverride" Value="0" /^>
-echo   ^<Updates Enabled="TRUE" /^>
-echo   ^<RemoveMSI /^>
-echo   ^<AppSettings^>
-echo     ^<User Key="software\microsoft\office\16.0\common\general" Name="shownfirstrunoptin" Value="1" Type="REG_DWORD" /^>
-echo   ^</AppSettings^>
-echo   ^<Display Level="None" AcceptEULA="TRUE" /^>
-echo ^</Configuration^>
-) > "%CONFIG_FILE%"
+echo ^<Configuration^>> "%CONFIG_FILE%"
+echo   ^<Add OfficeClientEdition="%OFFICE_ARCH%" Channel="%OFFICE_CHANNEL%"^>>> "%CONFIG_FILE%"
+echo     ^<Product ID="%OFFICE_PRODUCT%"^>>> "%CONFIG_FILE%"
+echo       ^<Language ID="%OFFICE_LANG%" /^>>> "%CONFIG_FILE%"
+echo       ^<Language ID="MatchOS" /^>>> "%CONFIG_FILE%"
+echo       ^<ExcludeApp ID="Publisher" /^>>> "%CONFIG_FILE%"
+echo       ^<ExcludeApp ID="Access" /^>>> "%CONFIG_FILE%"
+echo       ^<ExcludeApp ID="OneDrive" /^>>> "%CONFIG_FILE%"
+echo       ^<ExcludeApp ID="Teams" /^>>> "%CONFIG_FILE%"
+echo     ^</Product^>>> "%CONFIG_FILE%"
+echo   ^</Add^>>> "%CONFIG_FILE%"
+echo   ^<Property Name="SharedComputerLicensing" Value="0" /^>>> "%CONFIG_FILE%"
+echo   ^<Property Name="FORCEAPPSHUTDOWN" Value="TRUE" /^>>> "%CONFIG_FILE%"
+echo   ^<Property Name="DeviceBasedLicensing" Value="0" /^>>> "%CONFIG_FILE%"
+echo   ^<Property Name="SCLCacheOverride" Value="0" /^>>> "%CONFIG_FILE%"
+echo   ^<Updates Enabled="TRUE" /^>>> "%CONFIG_FILE%"
+echo   ^<RemoveMSI /^>>> "%CONFIG_FILE%"
+echo   ^<Display Level="None" AcceptEULA="TRUE" /^>>> "%CONFIG_FILE%"
+echo ^</Configuration^>>> "%CONFIG_FILE%"
 
 if not exist "%CONFIG_FILE%" (
     echo [ERROR] Failed to create configuration file
