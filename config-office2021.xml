@@ -1,0 +1,37 @@
+<Configuration>
+  <!-- Office 2021 LTSC Professional Plus - Configuration complète -->
+
+  <Add OfficeClientEdition="64" Channel="PerpetualVL2021">
+    <Product ID="ProPlus2021Volume" PIDKEY="FXYTK-NJJ8C-GB6DW-3DYQT-6F7TH">
+      <Language ID="fr-fr" />
+      <Language ID="en-us" />
+      <Language ID="MatchOS" />
+      <!-- Exclure les applications non désirées -->
+      <ExcludeApp ID="Publisher" />
+      <ExcludeApp ID="Access" />
+      <ExcludeApp ID="OneDrive" />
+    </Product>
+  </Add>
+
+  <!-- Forcer la fermeture des applications Office pendant l'installation -->
+  <Property Name="FORCEAPPSHUTDOWN" Value="TRUE" />
+
+  <!-- Désactiver le licensing partagé (pour usage personnel) -->
+  <Property Name="SharedComputerLicensing" Value="0" />
+  <Property Name="DeviceBasedLicensing" Value="0" />
+  <Property Name="SCLCacheOverride" Value="0" />
+
+  <!-- Activer les mises à jour automatiques -->
+  <Updates Enabled="TRUE" />
+
+  <!-- Supprimer les anciennes versions de MSI Office -->
+  <RemoveMSI />
+
+  <!-- Paramètres d'affichage - Installation silencieuse -->
+  <Display Level="None" AcceptEULA="TRUE" />
+
+  <!-- Paramètres de l'application -->
+  <AppSettings>
+    <User Key="software\microsoft\office\16.0\common\general" Name="shownfirstrunoptin" Value="1" Type="REG_DWORD" />
+  </AppSettings>
+</Configuration>
