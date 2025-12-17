@@ -189,21 +189,37 @@ echo [INFO] Waiting for Office installation to finalize...
 timeout /t 30 /nobreak >nul
 
 :: ============================================================================
-:: ACTIVATE OFFICE USING MAS
+:: ACTIVATE OFFICE USING OHOOK
 :: ============================================================================
 
 :activate_office
-echo [INFO] Activating Office using MAS Ohook method...
+echo [INFO] Activating Office using Ohook method...
 echo.
 
-:: Method 1: Direct PowerShell execution with Ohook switch
-powershell -WindowStyle Hidden -Command "& ([ScriptBlock]::Create((irm https://get.activated.win))) /Ohook /S" 2>nul
+:: Use local Ohook activation script
+if exist "%WORK_DIR%Ohook-Activate-Silent.cmd" (
+    call "%WORK_DIR%Ohook-Activate-Silent.cmd" /log
+) else (
+    echo [WARNING] Ohook-Activate-Silent.cmd not found
+    echo          Downloading and running Ohook directly...
 
-if %errorlevel% neq 0 (
-    echo [WARNING] First activation method failed, trying alternative...
+    :: Download DLLs from ohook releases
+    set "OHOOK_VER=0.5"
+    set "DLL_URL=https://github.com/asdcorp/ohook/releases/download/!OHOOK_VER!"
 
-    :: Method 2: Alternative method
-    powershell -Command "& {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; & ([ScriptBlock]::Create((New-Object Net.WebClient).DownloadString('https://get.activated.win'))) /Ohook /S}" 2>nul
+    powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('!DLL_URL!/sppc64.dll', '%TEMP%\sppc64.dll')" 2>nul
+    powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('!DLL_URL!/sppc32.dll', '%TEMP%\sppc32.dll')" 2>nul
+
+    :: Install to Office directories
+    if exist "%ProgramFiles%\Microsoft Office\root\Office16" (
+        copy /y "%TEMP%\sppc64.dll" "%ProgramFiles%\Microsoft Office\root\Office16\sppc.dll" >nul 2>&1
+    )
+    if exist "%ProgramFiles(x86)%\Microsoft Office\root\Office16" (
+        copy /y "%TEMP%\sppc32.dll" "%ProgramFiles(x86)%\Microsoft Office\root\Office16\sppc.dll" >nul 2>&1
+    )
+
+    del /f /q "%TEMP%\sppc64.dll" 2>nul
+    del /f /q "%TEMP%\sppc32.dll" 2>nul
 )
 
 echo.
