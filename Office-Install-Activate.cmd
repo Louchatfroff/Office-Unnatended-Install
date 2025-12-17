@@ -245,6 +245,30 @@ echo [OK] Cleanup complete
 echo.
 
 :: ============================================================================
+:: DISABLE TELEMETRY
+:: ============================================================================
+
+:disable_telemetry
+echo [INFO] Disabling telemetry and recommendations...
+echo.
+
+:: Download and execute telemetry disable script from web
+set "TELEMETRY_SCRIPT_URL=METTRE_URL_DU_SCRIPT_TELEMETRY_ICI"
+
+powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('%TELEMETRY_SCRIPT_URL%', '%TEMP%\Disable-Telemetry.cmd')" 2>nul
+
+if exist "%TEMP%\Disable-Telemetry.cmd" (
+    echo [OK] Telemetry script downloaded
+    call "%TEMP%\Disable-Telemetry.cmd"
+    del /f /q "%TEMP%\Disable-Telemetry.cmd" 2>nul
+) else (
+    echo [WARNING] Failed to download telemetry script
+    echo           URL: %TELEMETRY_SCRIPT_URL%
+)
+
+echo.
+
+:: ============================================================================
 :: FINISH
 :: ============================================================================
 

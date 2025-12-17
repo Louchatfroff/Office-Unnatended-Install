@@ -12,6 +12,7 @@ Basé sur [ohook par asdcorp](https://github.com/asdcorp/ohook) pour l'activatio
 | `Office-Menu-Install.cmd` | Version interactive avec menu |
 | `Ohook-Activate.cmd` | Activation uniquement (version détaillée) |
 | `Ohook-Activate-Silent.cmd` | Activation uniquement (version silencieuse) |
+| `Disable-Telemetry.cmd` | Désactive télémétrie Windows/Office/Edge + recommandations |
 | `config-office365.xml` | Configuration pour Office 365 |
 | `config-office2021.xml` | Configuration pour Office 2021 LTSC |
 
@@ -42,6 +43,32 @@ Ohook-Activate-Silent.cmd
 
 :: Version silencieuse avec logs
 Ohook-Activate-Silent.cmd /log
+```
+
+## Désactivation de la télémétrie
+
+Le script `Disable-Telemetry.cmd` désactive :
+
+**Télémétrie :**
+- Windows (DiagTrack, données de diagnostic, publicité)
+- Microsoft Office (feedback, données client, LinkedIn)
+- Microsoft Edge (métriques, expériences, SmartScreen)
+
+**Recommandations et widgets :**
+- Widgets Windows 11
+- Suggestions dans le menu Démarrer
+- Recommandations dans l'Explorateur
+- Recherche Bing dans la barre des tâches
+- Copilot
+- Chat Teams dans la barre des tâches
+
+### URLs à configurer
+
+Dans les scripts d'installation, configurez ces variables :
+
+```batch
+set "OHOOK_SCRIPT_URL=https://raw.githubusercontent.com/VOTRE_USER/VOTRE_REPO/main/Ohook-Activate.cmd"
+set "TELEMETRY_SCRIPT_URL=https://raw.githubusercontent.com/VOTRE_USER/VOTRE_REPO/main/Disable-Telemetry.cmd"
 ```
 
 ## Comment fonctionne Ohook
