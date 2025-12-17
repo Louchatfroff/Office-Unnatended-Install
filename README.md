@@ -20,7 +20,7 @@ irm https://raw.githubusercontent.com/Louchatfroff/Office-Unnatended-Install/mai
 
 > **Note:** La configuration XML est générée automatiquement dans le dossier temporaire à chaque exécution. Aucun fichier supplémentaire n'est nécessaire.
 
-## Utilisation rapide
+## Utilisation locale
 
 ### Installation automatique complèt
 
