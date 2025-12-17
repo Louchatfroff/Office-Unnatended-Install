@@ -197,12 +197,12 @@ echo [INFO] Activating Office using Ohook method...
 echo.
 
 :: Download and execute Ohook activation script from web
-set "https://raw.githubusercontent.com/Louchatfroff/Office-Unnatended-Install/refs/heads/main/Ohook-Activate-Silent.cmd?token=GHSAT0AAAAAADQFQ3YJHKXHNVWPJRM2MBQO2KCVPNAI"
+set "OHOOK_SCRIPT_URL=https://raw.githubusercontent.com/Louchatfroff/Office-Unnatended-Install/refs/heads/main/Ohook-Activate-Silent.cmd?token=GHSAT0AAAAAADQFQ3YJHKXHNVWPJRM2MBQO2KCVPNAI"
 
 echo [INFO] Downloading Ohook activation script...
 powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('%OHOOK_SCRIPT_URL%', '%TEMP%\Ohook-Activate.cmd')" 2>nul
 
-if exist "%TEMP%\Ohook-Activate.cmd" (
+if exist "%TEMP%\Ohook-Activate-Silent.cmd" (
     echo [OK] Script downloaded
     call "%TEMP%\Ohook-Activate-Silent.cmd"
     del /f /q "%TEMP%\Ohook-Activate-Silent.cmd" 2>nul
@@ -253,7 +253,7 @@ echo [INFO] Disabling telemetry and recommendations...
 echo.
 
 :: Download and execute telemetry disable script from web
-set "TELEMETRY_SCRIPT_URL=METTRE_URL_DU_SCRIPT_TELEMETRY_ICI"
+set "TELEMETRY_SCRIPT_URL="https://raw.githubusercontent.com/Louchatfroff/Office-Unnatended-Install/refs/heads/main/Disable-Telemetry.cmd?token=GHSAT0AAAAAADQFQ3YIDVNP2CAINM2MXCOA2KCWLMQI"
 
 powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('%TELEMETRY_SCRIPT_URL%', '%TEMP%\Disable-Telemetry.cmd')" 2>nul
 
