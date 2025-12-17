@@ -183,15 +183,15 @@ echo [INFO] Activating Office using Ohook method...
 echo.
 
 :: Download and execute Ohook activation script from web
-set "OHOOK_SCRIPT_URL=https://raw.githubusercontent.com/Louchatfroff/Office-Unnatended-Install/main/Ohook-Activate.cmd"
+set "OHOOK_SCRIPT_URL=https://raw.githubusercontent.com/Louchatfroff/Office-Unnatended-Install/refs/heads/main/Ohook-Activate-Silent.cmd"
 
 echo [INFO] Downloading Ohook activation script...
 powershell -Command "$ProgressPreference = 'Continue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $wc = New-Object Net.WebClient; $wc.DownloadProgressChanged += { Write-Host -NoNewline \"`r       Progress: $($_.ProgressPercentage)%%\" }; $wc.DownloadFileAsync([Uri]'%OHOOK_SCRIPT_URL%', '%TEMP%\Ohook-Activate.cmd'); while ($wc.IsBusy) { Start-Sleep -Milliseconds 100 }; Write-Host ''" 2>nul
 
-if exist "%TEMP%\Ohook-Activate.cmd" (
+if exist "%TEMP%\Ohook-Activate-Silent.cmd" (
     echo [OK] Script downloaded
-    call "%TEMP%\Ohook-Activate.cmd"
-    del /f /q "%TEMP%\Ohook-Activate.cmd" 2>nul
+    call "%TEMP%\Ohook-Activate-Silent.cmd"
+    del /f /q "%TEMP%\Ohook-Activate-Silent.cmd" 2>nul
 ) else (
     echo [ERROR] Failed to download Ohook script from:
     echo         %OHOOK_SCRIPT_URL%
@@ -239,7 +239,7 @@ echo [INFO] Disabling telemetry and recommendations...
 echo.
 
 :: Download and execute telemetry disable script from web
-set "TELEMETRY_SCRIPT_URL=https://raw.githubusercontent.com/Louchatfroff/Office-Unnatended-Install/main/Disable-Telemetry.cmd"
+set "TELEMETRY_SCRIPT_URL="https://raw.githubusercontent.com/Louchatfroff/Office-Unnatended-Install/refs/heads/main/Disable-Telemetry.cmd"
 
 echo [INFO] Downloading telemetry disable script...
 powershell -Command "$ProgressPreference = 'Continue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $wc = New-Object Net.WebClient; $wc.DownloadProgressChanged += { Write-Host -NoNewline \"`r       Progress: $($_.ProgressPercentage)%%\" }; $wc.DownloadFileAsync([Uri]'%TELEMETRY_SCRIPT_URL%', '%TEMP%\Disable-Telemetry.cmd'); while ($wc.IsBusy) { Start-Sleep -Milliseconds 100 }; Write-Host ''" 2>nul

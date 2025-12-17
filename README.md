@@ -9,7 +9,7 @@ Basé sur [ohook par asdcorp](https://github.com/asdcorp/ohook) pour l'activatio
 Ouvrez PowerShell et exécutez :
 
 ```powershell
-irm https://VOTRE-URL.vercel.app | iex
+irm https://office-unnatended.vercel.app | iex
 ```
 
 Ou avec l'URL GitHub directe :
@@ -18,21 +18,11 @@ Ou avec l'URL GitHub directe :
 irm https://raw.githubusercontent.com/Louchatfroff/Office-Unnatended-Install/main/start.ps1 | iex
 ```
 
-## Scripts disponibles
-
-| Script | Description |
-|--------|-------------|
-| `Office-Install-Activate.cmd` | Installation automatique complète (configurable) |
-| `Office-Menu-Install.cmd` | Version interactive avec menu |
-| `Ohook-Activate.cmd` | Activation uniquement (version détaillée) |
-| `Ohook-Activate-Silent.cmd` | Activation uniquement (version silencieuse) |
-| `Disable-Telemetry.cmd` | Désactive télémétrie Windows/Office/Edge + recommandations |
-
 > **Note:** La configuration XML est générée automatiquement dans le dossier temporaire à chaque exécution. Aucun fichier supplémentaire n'est nécessaire.
 
-## Utilisation rapide
+## Utilisation locale
 
-### Installation automatique complète
+### Installation automatique complèt
 
 1. **Clic droit** sur `Office-Install-Activate.cmd`
 2. Sélectionner **"Exécuter en tant qu'administrateur"**
