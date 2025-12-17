@@ -166,12 +166,7 @@ echo.
 timeout /t 20 /nobreak >nul
 
 :: Activate
-echo [INFO] Activation avec Ohook...
-if exist "%WORK_DIR%Ohook-Activate-Silent.cmd" (
-    call "%WORK_DIR%Ohook-Activate-Silent.cmd" /log
-) else (
-    call :run_ohook
-)
+call :run_ohook
 echo.
 echo [OK] Activation terminee
 echo.
@@ -216,16 +211,11 @@ goto :eof
 :: ============================================================================
 :activate_only
 cls
-set "WORK_DIR=%~dp0"
 echo.
 echo [INFO] Activation de Office avec Ohook...
 echo.
 
-if exist "%WORK_DIR%Ohook-Activate-Silent.cmd" (
-    call "%WORK_DIR%Ohook-Activate-Silent.cmd" /log
-) else (
-    call :run_ohook
-)
+call :run_ohook
 
 echo.
 echo [OK] Activation terminee
@@ -234,28 +224,23 @@ pause
 goto menu
 
 :: ============================================================================
-:: RUN OHOOK DIRECTLY
+:: RUN OHOOK FROM WEB
 :: ============================================================================
 :run_ohook
-echo [INFO] Telechargement et installation Ohook...
+echo [INFO] Telechargement du script Ohook...
 
-set "OHOOK_VER=0.5"
-set "DLL_URL=https://github.com/asdcorp/ohook/releases/download/%OHOOK_VER%"
+set "OHOOK_SCRIPT_URL=METTRE_URL_DU_SCRIPT_OHOOK_ICI"
 
-powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('%DLL_URL%/sppc64.dll', '%TEMP%\sppc64.dll')" 2>nul
-powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('%DLL_URL%/sppc32.dll', '%TEMP%\sppc32.dll')" 2>nul
+powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('%OHOOK_SCRIPT_URL%', '%TEMP%\Ohook-Activate.cmd')" 2>nul
 
-if exist "%ProgramFiles%\Microsoft Office\root\Office16" (
-    copy /y "%TEMP%\sppc64.dll" "%ProgramFiles%\Microsoft Office\root\Office16\sppc.dll" >nul 2>&1
-    echo [OK] Office 64-bit
+if exist "%TEMP%\Ohook-Activate.cmd" (
+    echo [OK] Script telecharge
+    call "%TEMP%\Ohook-Activate.cmd"
+    del /f /q "%TEMP%\Ohook-Activate.cmd" 2>nul
+) else (
+    echo [ERROR] Echec du telechargement du script Ohook
+    echo         URL: %OHOOK_SCRIPT_URL%
 )
-if exist "%ProgramFiles(x86)%\Microsoft Office\root\Office16" (
-    copy /y "%TEMP%\sppc32.dll" "%ProgramFiles(x86)%\Microsoft Office\root\Office16\sppc.dll" >nul 2>&1
-    echo [OK] Office 32-bit
-)
-
-del /f /q "%TEMP%\sppc64.dll" 2>nul
-del /f /q "%TEMP%\sppc32.dll" 2>nul
 goto :eof
 
 :: ============================================================================

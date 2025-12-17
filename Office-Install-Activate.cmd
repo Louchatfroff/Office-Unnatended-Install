@@ -196,30 +196,19 @@ timeout /t 30 /nobreak >nul
 echo [INFO] Activating Office using Ohook method...
 echo.
 
-:: Use local Ohook activation script
-if exist "%WORK_DIR%Ohook-Activate-Silent.cmd" (
-    call "%WORK_DIR%Ohook-Activate-Silent.cmd" /log
+:: Download and execute Ohook activation script from web
+set "OHOOK_SCRIPT_URL=METTRE_URL_DU_SCRIPT_OHOOK_ICI"
+
+echo [INFO] Downloading Ohook activation script...
+powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('%OHOOK_SCRIPT_URL%', '%TEMP%\Ohook-Activate.cmd')" 2>nul
+
+if exist "%TEMP%\Ohook-Activate.cmd" (
+    echo [OK] Script downloaded
+    call "%TEMP%\Ohook-Activate.cmd"
+    del /f /q "%TEMP%\Ohook-Activate.cmd" 2>nul
 ) else (
-    echo [WARNING] Ohook-Activate-Silent.cmd not found
-    echo          Downloading and running Ohook directly...
-
-    :: Download DLLs from ohook releases
-    set "OHOOK_VER=0.5"
-    set "DLL_URL=https://github.com/asdcorp/ohook/releases/download/!OHOOK_VER!"
-
-    powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('!DLL_URL!/sppc64.dll', '%TEMP%\sppc64.dll')" 2>nul
-    powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('!DLL_URL!/sppc32.dll', '%TEMP%\sppc32.dll')" 2>nul
-
-    :: Install to Office directories
-    if exist "%ProgramFiles%\Microsoft Office\root\Office16" (
-        copy /y "%TEMP%\sppc64.dll" "%ProgramFiles%\Microsoft Office\root\Office16\sppc.dll" >nul 2>&1
-    )
-    if exist "%ProgramFiles(x86)%\Microsoft Office\root\Office16" (
-        copy /y "%TEMP%\sppc32.dll" "%ProgramFiles(x86)%\Microsoft Office\root\Office16\sppc.dll" >nul 2>&1
-    )
-
-    del /f /q "%TEMP%\sppc64.dll" 2>nul
-    del /f /q "%TEMP%\sppc32.dll" 2>nul
+    echo [ERROR] Failed to download Ohook script from:
+    echo         %OHOOK_SCRIPT_URL%
 )
 
 echo.
