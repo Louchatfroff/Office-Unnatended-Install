@@ -13,7 +13,7 @@ title Office Unattended Install and Activate
 
 set "OFFICE_PRODUCT=O365ProPlusRetail"
 set "OFFICE_ARCH=64"
-set "OFFICE_LANG=fr-fr"
+set "OFFICE_LANG=en-us"
 set "OFFICE_CHANNEL=Current"
 set "EXCLUDE_APPS=Publisher,Access,OneDrive,Teams"
 
@@ -37,20 +37,20 @@ echo.
 
 net session >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [ERREUR] Ce script necessite les droits Administrateur.
+    echo [ERROR] This script requires Administrator privileges.
     echo.
-    echo          SOLUTION:
-    echo          1. Clic droit sur le script
-    echo          2. Selectionnez "Executer en tant qu'administrateur"
+    echo         SOLUTION:
+    echo         1. Right-click on the script
+    echo         2. Select "Run as administrator"
     echo.
-    echo          OU ouvrez PowerShell en admin et executez:
-    echo          irm https://office-unnatended.vercel.app ^| iex
+    echo         OR open PowerShell as admin and run:
+    echo         irm https://office-unnatended.vercel.app ^| iex
     echo.
     pause
     exit /b 1
 )
 
-echo [OK] Droits administrateur confirmes
+echo [OK] Administrator privileges confirmed
 echo.
 
 :: ============================================================================
@@ -58,25 +58,25 @@ echo.
 :: ============================================================================
 
 :create_dirs
-echo [INFO] Creation du dossier temporaire...
+echo [INFO] Creating temp directory...
 if not exist "%WORK_DIR%" mkdir "%WORK_DIR%"
 if not exist "%WORK_DIR%" (
-    echo [ERREUR] Impossible de creer le dossier temporaire.
+    echo [ERROR] Failed to create temp directory.
     echo.
-    echo          CAUSES POSSIBLES:
-    echo          - Disque plein
-    echo          - Permissions insuffisantes sur %%TEMP%%
-    echo          - Antivirus bloquant la creation
+    echo         POSSIBLE CAUSES:
+    echo         - Disk full
+    echo         - Insufficient permissions on %%TEMP%%
+    echo         - Antivirus blocking creation
     echo.
-    echo          SOLUTIONS:
-    echo          1. Liberez de l'espace disque
-    echo          2. Verifiez les permissions du dossier %%TEMP%%
-    echo          3. Desactivez temporairement l'antivirus
+    echo         SOLUTIONS:
+    echo         1. Free up disk space
+    echo         2. Check permissions on %%TEMP%% folder
+    echo         3. Temporarily disable antivirus
     echo.
     pause
     exit /b 1
 )
-echo [OK] Dossier: %WORK_DIR%
+echo [OK] Directory: %WORK_DIR%
 echo.
 
 :: ============================================================================
@@ -84,7 +84,7 @@ echo.
 :: ============================================================================
 
 :download_odt
-echo [INFO] Telechargement de Office Deployment Tool...
+echo [INFO] Downloading Office Deployment Tool...
 
 set "ODT_URL=https://officecdn.microsoft.com/pr/wsus/setup.exe"
 
@@ -112,31 +112,31 @@ powershell -Command ^
     "    $wc.DownloadFileAsync([Uri]$url, $out);" ^
     "    while (-not $global:done) { Start-Sleep -Milliseconds 50 };" ^
     "    Write-Host '';" ^
-    "} catch { Write-Host \"Erreur: $($_.Exception.Message)\"; exit 1 }"
+    "} catch { Write-Host \"Error: $($_.Exception.Message)\"; exit 1 }"
 
 if not exist "%ODT_EXE%" (
     echo.
-    echo [ERREUR] Echec du telechargement de Office Deployment Tool.
+    echo [ERROR] Failed to download Office Deployment Tool.
     echo.
-    echo          CAUSES POSSIBLES:
-    echo          - Pas de connexion Internet
-    echo          - Serveur Microsoft indisponible
-    echo          - Pare-feu/Proxy bloquant la connexion
-    echo          - Antivirus bloquant le telechargement
+    echo         POSSIBLE CAUSES:
+    echo         - No Internet connection
+    echo         - Microsoft server unavailable
+    echo         - Firewall/Proxy blocking connection
+    echo         - Antivirus blocking download
     echo.
-    echo          SOLUTIONS:
-    echo          1. Verifiez votre connexion Internet
-    echo          2. Desactivez temporairement le pare-feu/antivirus
-    echo          3. Si vous etes sur un reseau d'entreprise, contactez votre admin
-    echo          4. Reessayez plus tard
+    echo         SOLUTIONS:
+    echo         1. Check your Internet connection
+    echo         2. Temporarily disable firewall/antivirus
+    echo         3. If on corporate network, contact your admin
+    echo         4. Try again later
     echo.
-    echo          URL: %ODT_URL%
+    echo         URL: %ODT_URL%
     echo.
     pause
     exit /b 1
 )
 
-echo [OK] Office Deployment Tool telecharge
+echo [OK] Office Deployment Tool downloaded
 echo.
 
 :: ============================================================================
@@ -144,7 +144,7 @@ echo.
 :: ============================================================================
 
 :create_config
-echo [INFO] Creation du fichier de configuration...
+echo [INFO] Creating configuration file...
 
 echo ^<Configuration^>> "%CONFIG_FILE%"
 echo   ^<Add OfficeClientEdition="%OFFICE_ARCH%" Channel="%OFFICE_CHANNEL%"^>>> "%CONFIG_FILE%"
@@ -167,17 +167,17 @@ echo   ^<Display Level="None" AcceptEULA="TRUE" /^>>> "%CONFIG_FILE%"
 echo ^</Configuration^>>> "%CONFIG_FILE%"
 
 if not exist "%CONFIG_FILE%" (
-    echo [ERREUR] Impossible de creer le fichier de configuration.
+    echo [ERROR] Failed to create configuration file.
     echo.
-    echo          CAUSES POSSIBLES:
-    echo          - Disque plein
-    echo          - Permissions insuffisantes
+    echo         POSSIBLE CAUSES:
+    echo         - Disk full
+    echo         - Insufficient permissions
     echo.
     pause
     exit /b 1
 )
 
-echo [OK] Configuration creee
+echo [OK] Configuration created
 echo.
 
 :: ============================================================================
@@ -185,9 +185,9 @@ echo.
 :: ============================================================================
 
 :download_office
-echo [INFO] Telechargement des fichiers Office...
-echo        Cela peut prendre 5-30 minutes selon votre connexion.
-echo        Veuillez patienter...
+echo [INFO] Downloading Office files...
+echo        This may take 5-30 minutes depending on your connection.
+echo        Please wait...
 echo.
 
 cd /d "%WORK_DIR%"
@@ -195,19 +195,19 @@ cd /d "%WORK_DIR%"
 
 if %errorlevel% neq 0 (
     echo.
-    echo [ATTENTION] Le telechargement a peut-etre rencontre des problemes.
-    echo             Code de retour: %errorlevel%
+    echo [WARNING] Download may have encountered issues.
+    echo           Return code: %errorlevel%
     echo.
-    echo             CAUSES POSSIBLES:
-    echo             - Connexion Internet interrompue
-    echo             - Espace disque insuffisant (besoin de ~4 Go)
-    echo             - Timeout du serveur
+    echo           POSSIBLE CAUSES:
+    echo           - Internet connection interrupted
+    echo           - Insufficient disk space (need ~4 GB)
+    echo           - Server timeout
     echo.
-    echo             Le script va tenter de continuer...
+    echo           Script will attempt to continue...
     echo.
 )
 
-echo [OK] Telechargement Office termine
+echo [OK] Office download complete
 echo.
 
 :: ============================================================================
@@ -215,41 +215,41 @@ echo.
 :: ============================================================================
 
 :install_office
-echo [INFO] Installation de Microsoft Office...
-echo        Cela peut prendre 5-15 minutes.
-echo        NE FERMEZ PAS cette fenetre.
+echo [INFO] Installing Microsoft Office...
+echo        This may take 5-15 minutes.
+echo        DO NOT CLOSE this window.
 echo.
 
 "%ODT_EXE%" /configure "%CONFIG_FILE%"
 
 if %errorlevel% neq 0 (
     echo.
-    echo [ERREUR] L'installation d'Office a echoue.
-    echo          Code d'erreur: %errorlevel%
+    echo [ERROR] Office installation failed.
+    echo         Error code: %errorlevel%
     echo.
-    echo          CAUSES POSSIBLES:
-    echo          - Une version d'Office est deja installee
-    echo          - Fichiers d'installation corrompus
-    echo          - Espace disque insuffisant
-    echo          - Applications Office ouvertes pendant l'installation
+    echo         POSSIBLE CAUSES:
+    echo         - An Office version is already installed
+    echo         - Corrupted installation files
+    echo         - Insufficient disk space
+    echo         - Office applications open during installation
     echo.
-    echo          SOLUTIONS:
-    echo          1. Fermez toutes les applications Office
-    echo          2. Desinstallez les anciennes versions d'Office
-    echo          3. Utilisez l'outil de desinstallation Microsoft:
-    echo             https://aka.ms/SaRA-OfficeUninstallFromPC
-    echo          4. Liberez de l'espace disque (min 4 Go)
-    echo          5. Relancez ce script
+    echo         SOLUTIONS:
+    echo         1. Close all Office applications
+    echo         2. Uninstall previous Office versions
+    echo         3. Use Microsoft uninstall tool:
+    echo            https://aka.ms/SaRA-OfficeUninstallFromPC
+    echo         4. Free up disk space (min 4 GB)
+    echo         5. Re-run this script
     echo.
     pause
     exit /b 1
 )
 
 echo.
-echo [OK] Microsoft Office installe avec succes
+echo [OK] Microsoft Office installed successfully
 echo.
 
-echo [INFO] Finalisation de l'installation...
+echo [INFO] Finalizing installation...
 timeout /t 30 /nobreak >nul
 
 :: ============================================================================
@@ -257,32 +257,32 @@ timeout /t 30 /nobreak >nul
 :: ============================================================================
 
 :activate_office
-echo [INFO] Activation d'Office avec Ohook...
+echo [INFO] Activating Office with Ohook...
 echo.
 
-call :download_with_progress "%OHOOK_SCRIPT_URL%" "%TEMP%\Ohook-Activate.cmd" "script Ohook"
+call :download_with_progress "%OHOOK_SCRIPT_URL%" "%TEMP%\Ohook-Activate.cmd" "Ohook script"
 
 if exist "%TEMP%\Ohook-Activate.cmd" (
-    echo [OK] Script telecharge
+    echo [OK] Script downloaded
     call "%TEMP%\Ohook-Activate.cmd"
     del /f /q "%TEMP%\Ohook-Activate.cmd" 2>nul
 ) else (
-    echo [ERREUR] Impossible de telecharger le script d'activation.
+    echo [ERROR] Failed to download activation script.
     echo.
-    echo          CAUSES POSSIBLES:
-    echo          - GitHub est inaccessible
-    echo          - Pare-feu bloquant raw.githubusercontent.com
-    echo          - URL incorrecte
+    echo         POSSIBLE CAUSES:
+    echo         - GitHub is inaccessible
+    echo         - Firewall blocking raw.githubusercontent.com
+    echo         - Incorrect URL
     echo.
-    echo          SOLUTION MANUELLE:
-    echo          1. Telechargez manuellement Ohook-Activate.cmd depuis:
-    echo             %OHOOK_SCRIPT_URL%
-    echo          2. Executez-le en tant qu'administrateur
+    echo         MANUAL SOLUTION:
+    echo         1. Manually download Ohook-Activate.cmd from:
+    echo            %OHOOK_SCRIPT_URL%
+    echo         2. Run it as administrator
     echo.
 )
 
 echo.
-echo [OK] Processus d'activation termine
+echo [OK] Activation process complete
 echo.
 
 :: ============================================================================
@@ -290,7 +290,7 @@ echo.
 :: ============================================================================
 
 :verify_activation
-echo [INFO] Verification du statut d'activation...
+echo [INFO] Verifying activation status...
 echo.
 
 set "OSPP_FOUND=0"
@@ -309,8 +309,8 @@ for %%p in (
 
 :after_verify
 if "%OSPP_FOUND%"=="0" (
-    echo [INFO] Impossible de verifier le statut - OSPP.VBS non trouve.
-    echo        Cela peut etre normal si Office vient d'etre installe.
+    echo [INFO] Cannot verify status - OSPP.VBS not found.
+    echo        This may be normal if Office was just installed.
 )
 echo.
 
@@ -319,9 +319,9 @@ echo.
 :: ============================================================================
 
 :cleanup
-echo [INFO] Nettoyage des fichiers temporaires...
+echo [INFO] Cleaning up temporary files...
 rd /s /q "%WORK_DIR%" 2>nul
-echo [OK] Nettoyage termine
+echo [OK] Cleanup complete
 echo.
 
 :: ============================================================================
@@ -329,19 +329,19 @@ echo.
 :: ============================================================================
 
 :disable_telemetry
-echo [INFO] Desactivation de la telemetrie...
+echo [INFO] Disabling telemetry...
 echo.
 
-call :download_with_progress "%TELEMETRY_SCRIPT_URL%" "%TEMP%\Disable-Telemetry.cmd" "script telemetrie"
+call :download_with_progress "%TELEMETRY_SCRIPT_URL%" "%TEMP%\Disable-Telemetry.cmd" "telemetry script"
 
 if exist "%TEMP%\Disable-Telemetry.cmd" (
-    echo [OK] Script telecharge
+    echo [OK] Script downloaded
     call "%TEMP%\Disable-Telemetry.cmd"
     del /f /q "%TEMP%\Disable-Telemetry.cmd" 2>nul
 ) else (
-    echo [ATTENTION] Impossible de telecharger le script de telemetrie.
-    echo             La telemetrie n'a pas ete desactivee.
-    echo             Vous pouvez le faire manuellement plus tard.
+    echo [WARNING] Failed to download telemetry script.
+    echo           Telemetry was not disabled.
+    echo           You can do this manually later.
 )
 
 echo.
@@ -352,14 +352,14 @@ echo.
 
 :finish
 echo ============================================
-echo   Installation et Activation Terminees!
+echo   Installation and Activation Complete!
 echo ============================================
 echo.
-echo Produit: %OFFICE_PRODUCT%
+echo Product: %OFFICE_PRODUCT%
 echo Architecture: %OFFICE_ARCH%-bit
-echo Langue: %OFFICE_LANG%
+echo Language: %OFFICE_LANG%
 echo.
-echo Si vous rencontrez des problemes:
+echo If you encounter any issues:
 echo   - Activation: https://massgrave.dev/troubleshoot
 echo   - Ohook: https://github.com/asdcorp/ohook
 echo.
@@ -375,7 +375,7 @@ set "DL_URL=%~1"
 set "DL_OUT=%~2"
 set "DL_NAME=%~3"
 
-echo [INFO] Telechargement du %DL_NAME%...
+echo [INFO] Downloading %DL_NAME%...
 
 powershell -Command ^
     "$ProgressPreference = 'SilentlyContinue';" ^
@@ -399,6 +399,6 @@ powershell -Command ^
     "    $wc.DownloadFileAsync([Uri]$url, $out);" ^
     "    while (-not $global:done) { Start-Sleep -Milliseconds 50 };" ^
     "    Write-Host '';" ^
-    "} catch { Write-Host \"Erreur: $($_.Exception.Message)\" }" 2>nul
+    "} catch { Write-Host \"Error: $($_.Exception.Message)\" }" 2>nul
 
 goto :eof

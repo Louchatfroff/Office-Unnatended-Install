@@ -10,7 +10,7 @@ title Office Installation Menu
 :: Check admin
 net session >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [ERROR] Lancez ce script en tant qu'administrateur.
+    echo [ERROR] Please run this script as Administrator.
     pause
     exit /b 1
 )
@@ -22,21 +22,21 @@ echo  ============================================================
 echo      OFFICE UNATTENDED INSTALLATION AND ACTIVATION
 echo  ============================================================
 echo.
-echo      [1] Office 365 ProPlus (Recommande)
+echo      [1] Office 365 ProPlus (Recommended)
 echo      [2] Office 2021 LTSC Professional Plus
 echo      [3] Office 2019 Professional Plus
-echo      [4] Installation avec fichier config personnalise
+echo      [4] Install with custom config file
 echo.
-echo      [5] Activer Office uniquement (deja installe)
-echo      [6] Verifier le statut d'activation
-echo      [7] Desactiver telemetrie et recommandations
+echo      [5] Activate Office only (already installed)
+echo      [6] Check activation status
+echo      [7] Disable telemetry and recommendations
 echo.
-echo      [0] Quitter
+echo      [0] Exit
 echo.
 echo  ============================================================
 echo.
 
-set /p choice="  Votre choix [0-7]: "
+set /p choice="  Your choice [0-7]: "
 
 if "%choice%"=="1" goto install_365
 if "%choice%"=="2" goto install_2021
@@ -47,7 +47,7 @@ if "%choice%"=="6" goto check_status
 if "%choice%"=="7" goto disable_telemetry
 if "%choice%"=="0" goto end
 
-echo  [ERROR] Choix invalide
+echo  [ERROR] Invalid choice
 timeout /t 2 >nul
 goto menu
 
@@ -57,7 +57,7 @@ goto menu
 :install_365
 cls
 echo.
-echo [INFO] Installation de Office 365 ProPlus...
+echo [INFO] Installing Office 365 ProPlus...
 echo.
 
 set "PRODUCT=O365ProPlusRetail"
@@ -71,7 +71,7 @@ goto do_install
 :install_2021
 cls
 echo.
-echo [INFO] Installation de Office 2021 LTSC Professional Plus...
+echo [INFO] Installing Office 2021 LTSC Professional Plus...
 echo.
 
 set "PRODUCT=ProPlus2021Volume"
@@ -85,7 +85,7 @@ goto do_install
 :install_2019
 cls
 echo.
-echo [INFO] Installation de Office 2019 Professional Plus...
+echo [INFO] Installing Office 2019 Professional Plus...
 echo.
 
 set "PRODUCT=ProPlus2019Volume"
@@ -99,12 +99,12 @@ goto do_install
 :install_custom
 cls
 echo.
-echo [INFO] Installation avec fichier de configuration personnalise
+echo [INFO] Install with custom configuration file
 echo.
-set /p CONFIG_PATH="  Chemin du fichier XML: "
+set /p CONFIG_PATH="  Path to XML file: "
 
 if not exist "%CONFIG_PATH%" (
-    echo [ERROR] Fichier non trouve: %CONFIG_PATH%
+    echo [ERROR] File not found: %CONFIG_PATH%
     pause
     goto menu
 )
@@ -124,7 +124,7 @@ set "CONFIG_FILE=%WORK_DIR%\config.xml"
 if not exist "%WORK_DIR%" mkdir "%WORK_DIR%"
 
 :: Download ODT
-echo [INFO] Telechargement de Office Deployment Tool...
+echo [INFO] Downloading Office Deployment Tool...
 powershell -Command ^
     "$ProgressPreference = 'SilentlyContinue';" ^
     "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
@@ -148,26 +148,26 @@ powershell -Command ^
     "    $wc.DownloadFileAsync([Uri]$url, $out);" ^
     "    while (-not $global:done) { Start-Sleep -Milliseconds 50 };" ^
     "    Write-Host '';" ^
-    "} catch { Write-Host \"Erreur: $($_.Exception.Message)\"; exit 1 }"
+    "} catch { Write-Host \"Error: $($_.Exception.Message)\"; exit 1 }"
 
 if not exist "%ODT_EXE%" (
     echo.
-    echo [ERROR] Echec du telechargement de ODT
+    echo [ERROR] Failed to download ODT
     echo.
-    echo         CAUSES POSSIBLES:
-    echo         - Pas de connexion Internet
-    echo         - Serveur Microsoft indisponible
-    echo         - Pare-feu/Proxy bloquant la connexion
+    echo         POSSIBLE CAUSES:
+    echo         - No Internet connection
+    echo         - Microsoft server unavailable
+    echo         - Firewall/Proxy blocking connection
     echo.
     echo         SOLUTIONS:
-    echo         1. Verifiez votre connexion Internet
-    echo         2. Desactivez temporairement le pare-feu/antivirus
-    echo         3. Reessayez plus tard
+    echo         1. Check your Internet connection
+    echo         2. Temporarily disable firewall/antivirus
+    echo         3. Try again later
     echo.
     pause
     goto menu
 )
-echo [OK] ODT telecharge
+echo [OK] ODT downloaded
 echo.
 
 :: Create or use config
@@ -178,22 +178,22 @@ if defined USE_CUSTOM (
 )
 
 :: Download Office
-echo [INFO] Telechargement des fichiers Office...
-echo        Cela peut prendre plusieurs minutes...
+echo [INFO] Downloading Office files...
+echo        This may take several minutes...
 echo.
 cd /d "%WORK_DIR%"
 "%ODT_EXE%" /download "%CONFIG_FILE%"
 echo.
-echo [OK] Telechargement termine
+echo [OK] Download complete
 echo.
 
 :: Install Office
-echo [INFO] Installation de Microsoft Office...
-echo        Veuillez patienter 5-15 minutes...
+echo [INFO] Installing Microsoft Office...
+echo        Please wait 5-15 minutes...
 echo.
 "%ODT_EXE%" /configure "%CONFIG_FILE%"
 echo.
-echo [OK] Installation terminee
+echo [OK] Installation complete
 echo.
 
 :: Wait
@@ -202,19 +202,19 @@ timeout /t 20 /nobreak >nul
 :: Activate
 call :run_ohook
 echo.
-echo [OK] Activation terminee
+echo [OK] Activation complete
 echo.
 
 :: Disable telemetry
 call :run_telemetry_disable
 echo.
-echo [OK] Telemetrie desactivee
+echo [OK] Telemetry disabled
 echo.
 
 :: Cleanup temp directory
-echo [INFO] Nettoyage des fichiers temporaires...
+echo [INFO] Cleaning up temporary files...
 rd /s /q "%WORK_DIR%" 2>nul
-echo [OK] Nettoyage termine
+echo [OK] Cleanup complete
 echo.
 
 pause
@@ -224,7 +224,7 @@ goto menu
 :: CREATE CONFIG FILE
 :: ============================================================================
 :create_config
-echo [INFO] Creation du fichier de configuration...
+echo [INFO] Creating configuration file...
 
 set "PIDKEY_LINE="
 if defined PIDKEY set "PIDKEY_LINE= PIDKEY=\"%PIDKEY%\""
@@ -233,7 +233,7 @@ if defined PIDKEY set "PIDKEY_LINE= PIDKEY=\"%PIDKEY%\""
 echo ^<Configuration^>
 echo   ^<Add OfficeClientEdition="64" Channel="%CHANNEL%"^>
 echo     ^<Product ID="%PRODUCT%"%PIDKEY_LINE%^>
-echo       ^<Language ID="fr-fr" /^>
+echo       ^<Language ID="en-us" /^>
 echo       ^<Language ID="MatchOS" /^>
 echo       ^<ExcludeApp ID="Publisher" /^>
 echo       ^<ExcludeApp ID="Access" /^>
@@ -249,7 +249,7 @@ echo   ^<Display Level="None" AcceptEULA="TRUE" /^>
 echo ^</Configuration^>
 ) > "%CONFIG_FILE%"
 
-echo [OK] Configuration creee
+echo [OK] Configuration created
 goto :eof
 
 :: ============================================================================
@@ -258,13 +258,13 @@ goto :eof
 :activate_only
 cls
 echo.
-echo [INFO] Activation de Office avec Ohook...
+echo [INFO] Activating Office with Ohook...
 echo.
 
 call :run_ohook
 
 echo.
-echo [OK] Activation terminee
+echo [OK] Activation complete
 echo.
 pause
 goto menu
@@ -273,7 +273,7 @@ goto menu
 :: RUN OHOOK FROM WEB
 :: ============================================================================
 :run_ohook
-echo [INFO] Telechargement du script Ohook...
+echo [INFO] Downloading Ohook script...
 
 set "OHOOK_SCRIPT_URL=https://raw.githubusercontent.com/Louchatfroff/Office-Unnatended-Install/main/Ohook-Activate.cmd"
 
@@ -299,24 +299,24 @@ powershell -Command ^
     "    $wc.DownloadFileAsync([Uri]$url, $out);" ^
     "    while (-not $global:done) { Start-Sleep -Milliseconds 50 };" ^
     "    Write-Host '';" ^
-    "} catch { Write-Host \"Erreur: $($_.Exception.Message)\" }" 2>nul
+    "} catch { Write-Host \"Error: $($_.Exception.Message)\" }" 2>nul
 
 if exist "%TEMP%\Ohook-Activate.cmd" (
-    echo [OK] Script telecharge
+    echo [OK] Script downloaded
     call "%TEMP%\Ohook-Activate.cmd"
     del /f /q "%TEMP%\Ohook-Activate.cmd" 2>nul
 ) else (
     echo.
-    echo [ERROR] Echec du telechargement du script Ohook
+    echo [ERROR] Failed to download Ohook script
     echo.
-    echo         CAUSES POSSIBLES:
-    echo         - GitHub est inaccessible
-    echo         - Pare-feu bloquant raw.githubusercontent.com
+    echo         POSSIBLE CAUSES:
+    echo         - GitHub is unreachable
+    echo         - Firewall blocking raw.githubusercontent.com
     echo.
     echo         SOLUTIONS:
-    echo         1. Verifiez votre connexion Internet
-    echo         2. Essayez d'acceder a github.com
-    echo         3. Desactivez temporairement le pare-feu
+    echo         1. Check your Internet connection
+    echo         2. Try accessing github.com
+    echo         3. Temporarily disable firewall
     echo.
     echo         URL: %OHOOK_SCRIPT_URL%
 )
@@ -328,13 +328,13 @@ goto :eof
 :disable_telemetry
 cls
 echo.
-echo [INFO] Desactivation de la telemetrie et des recommandations...
+echo [INFO] Disabling telemetry and recommendations...
 echo.
 
 call :run_telemetry_disable
 
 echo.
-echo [OK] Telemetrie et recommandations desactivees
+echo [OK] Telemetry and recommendations disabled
 echo.
 pause
 goto menu
@@ -343,7 +343,7 @@ goto menu
 :: RUN TELEMETRY DISABLE FROM WEB
 :: ============================================================================
 :run_telemetry_disable
-echo [INFO] Telechargement du script de desactivation...
+echo [INFO] Downloading disable script...
 
 set "TELEMETRY_SCRIPT_URL=https://raw.githubusercontent.com/Louchatfroff/Office-Unnatended-Install/main/Disable-Telemetry.cmd"
 
@@ -369,23 +369,23 @@ powershell -Command ^
     "    $wc.DownloadFileAsync([Uri]$url, $out);" ^
     "    while (-not $global:done) { Start-Sleep -Milliseconds 50 };" ^
     "    Write-Host '';" ^
-    "} catch { Write-Host \"Erreur: $($_.Exception.Message)\" }" 2>nul
+    "} catch { Write-Host \"Error: $($_.Exception.Message)\" }" 2>nul
 
 if exist "%TEMP%\Disable-Telemetry.cmd" (
-    echo [OK] Script telecharge
+    echo [OK] Script downloaded
     call "%TEMP%\Disable-Telemetry.cmd"
     del /f /q "%TEMP%\Disable-Telemetry.cmd" 2>nul
 ) else (
     echo.
-    echo [ERROR] Echec du telechargement du script
+    echo [ERROR] Failed to download script
     echo.
-    echo         CAUSES POSSIBLES:
-    echo         - GitHub est inaccessible
-    echo         - Pare-feu bloquant raw.githubusercontent.com
+    echo         POSSIBLE CAUSES:
+    echo         - GitHub is unreachable
+    echo         - Firewall blocking raw.githubusercontent.com
     echo.
     echo         SOLUTIONS:
-    echo         1. Verifiez votre connexion Internet
-    echo         2. Desactivez temporairement le pare-feu
+    echo         1. Check your Internet connection
+    echo         2. Temporarily disable firewall
     echo.
     echo         URL: %TELEMETRY_SCRIPT_URL%
 )
@@ -397,7 +397,7 @@ goto :eof
 :check_status
 cls
 echo.
-echo [INFO] Verification du statut d'activation Office...
+echo [INFO] Checking Office activation status...
 echo.
 echo ============================================================
 
@@ -413,7 +413,7 @@ if exist "%ProgramFiles(x86)%\Microsoft Office\Office16\OSPP.VBS" (
 )
 
 if "%OSPP_FOUND%"=="0" (
-    echo [WARNING] Office ne semble pas etre installe ou OSPP.VBS introuvable
+    echo [WARNING] Office does not appear to be installed or OSPP.VBS not found
 )
 
 echo.
@@ -427,6 +427,6 @@ goto menu
 :: ============================================================================
 :end
 echo.
-echo  Au revoir!
+echo  Goodbye!
 echo.
 exit /b 0

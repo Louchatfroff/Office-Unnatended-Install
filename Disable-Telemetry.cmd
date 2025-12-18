@@ -12,21 +12,21 @@ title Disable Telemetry and Recommendations
 :: ============================================================================
 net session >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [ERREUR] Ce script necessite les droits Administrateur.
+    echo [ERROR] This script requires Administrator privileges.
     pause
     exit /b 1
 )
 
 echo.
 echo ============================================
-echo   Desactivation Telemetrie et Recommandations
+echo   Disable Telemetry and Recommendations
 echo ============================================
 echo.
 
 :: ============================================================================
 :: WINDOWS TELEMETRY
 :: ============================================================================
-echo [INFO] Desactivation de la telemetrie Windows...
+echo [INFO] Disabling Windows telemetry...
 
 :: Disable Telemetry
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d 0 /f >nul 2>&1
@@ -73,13 +73,13 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "EnableActivityFeed
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "PublishUserActivities" /t REG_DWORD /d 0 /f >nul 2>&1
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "UploadUserActivities" /t REG_DWORD /d 0 /f >nul 2>&1
 
-echo [OK] Telemetrie Windows desactivee
+echo [OK] Windows telemetry disabled
 echo.
 
 :: ============================================================================
 :: OFFICE TELEMETRY
 :: ============================================================================
-echo [INFO] Desactivation de la telemetrie Office...
+echo [INFO] Disabling Office telemetry...
 
 :: Office 16 (2016, 2019, 2021, 365)
 reg add "HKCU\SOFTWARE\Microsoft\Office\16.0\Common" /v "sendcustomerdata" /t REG_DWORD /d 0 /f >nul 2>&1
@@ -108,13 +108,13 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Office\16.0\Common\Privacy" /v "Contro
 :: Disable Office LinkedIn features
 reg add "HKCU\SOFTWARE\Microsoft\Office\16.0\Common\LinkedIn" /v "OfficeLinkedIn" /t REG_DWORD /d 0 /f >nul 2>&1
 
-echo [OK] Telemetrie Office desactivee
+echo [OK] Office telemetry disabled
 echo.
 
 :: ============================================================================
 :: EDGE TELEMETRY
 :: ============================================================================
-echo [INFO] Desactivation de la telemetrie Edge...
+echo [INFO] Disabling Edge telemetry...
 
 :: Disable Edge telemetry
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Edge" /v "MetricsReportingEnabled" /t REG_DWORD /d 0 /f >nul 2>&1
@@ -140,13 +140,13 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Edge" /v "HubsSidebarEnabled" /t REG_D
 :: Disable Edge first run experience
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Edge" /v "HideFirstRunExperience" /t REG_DWORD /d 1 /f >nul 2>&1
 
-echo [OK] Telemetrie Edge desactivee
+echo [OK] Edge telemetry disabled
 echo.
 
 :: ============================================================================
 :: DISABLE WIDGETS
 :: ============================================================================
-echo [INFO] Desactivation des Widgets...
+echo [INFO] Disabling Widgets...
 
 :: Disable Widgets
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Dsh" /v "AllowNewsAndInterests" /t REG_DWORD /d 0 /f >nul 2>&1
@@ -155,13 +155,13 @@ reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "T
 :: Disable News and Interests on taskbar (Windows 10)
 reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Feeds" /v "ShellFeedsTaskbarViewMode" /t REG_DWORD /d 2 /f >nul 2>&1
 
-echo [OK] Widgets desactives
+echo [OK] Widgets disabled
 echo.
 
 :: ============================================================================
 :: DISABLE EXPLORER RECOMMENDATIONS
 :: ============================================================================
-echo [INFO] Desactivation des recommandations Explorateur...
+echo [INFO] Disabling Explorer recommendations...
 
 :: Disable "Show sync provider notifications"
 reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "ShowSyncProviderNotifications" /t REG_DWORD /d 0 /f >nul 2>&1
@@ -174,13 +174,13 @@ reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" 
 reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SubscribedContent-353694Enabled" /t REG_DWORD /d 0 /f >nul 2>&1
 reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SubscribedContent-353696Enabled" /t REG_DWORD /d 0 /f >nul 2>&1
 
-echo [OK] Recommandations Explorateur desactivees
+echo [OK] Explorer recommendations disabled
 echo.
 
 :: ============================================================================
 :: DISABLE START MENU RECOMMENDATIONS
 :: ============================================================================
-echo [INFO] Desactivation des recommandations Menu Demarrer...
+echo [INFO] Disabling Start Menu recommendations...
 
 :: Disable Start Menu suggestions
 reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SystemPaneSuggestionsEnabled" /t REG_DWORD /d 0 /f >nul 2>&1
@@ -214,13 +214,13 @@ reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" 
 :: Disable "Suggest ways to get the most out of Windows"
 reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v "ScoobeSystemSettingEnabled" /t REG_DWORD /d 0 /f >nul 2>&1
 
-echo [OK] Recommandations Menu Demarrer desactivees
+echo [OK] Start Menu recommendations disabled
 echo.
 
 :: ============================================================================
 :: DISABLE TASKBAR RECOMMENDATIONS
 :: ============================================================================
-echo [INFO] Desactivation des recommandations Barre des taches...
+echo [INFO] Disabling Taskbar recommendations...
 
 :: Disable Search highlights
 reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\SearchSettings" /v "IsDynamicSearchBoxEnabled" /t REG_DWORD /d 0 /f >nul 2>&1
@@ -244,13 +244,13 @@ reg add "HKCU\SOFTWARE\Policies\Microsoft\Windows\Explorer" /v "DisableSearchBox
 reg add "HKCU\SOFTWARE\Policies\Microsoft\Windows\Explorer" /v "DisableSearchBoxSuggestions" /t REG_DWORD /d 1 /f >nul 2>&1
 reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v "BingSearchEnabled" /t REG_DWORD /d 0 /f >nul 2>&1
 
-echo [OK] Recommandations Barre des taches desactivees
+echo [OK] Taskbar recommendations disabled
 echo.
 
 :: ============================================================================
 :: DISABLE OTHER ANNOYANCES
 :: ============================================================================
-echo [INFO] Desactivation d'autres elements...
+echo [INFO] Disabling other elements...
 
 :: Disable "Finish setting up your device"
 reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v "ScoobeSystemSettingEnabled" /t REG_DWORD /d 0 /f >nul 2>&1
@@ -268,36 +268,36 @@ reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" 
 :: Disable Timeline
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "EnableActivityFeed" /t REG_DWORD /d 0 /f >nul 2>&1
 
-echo [OK] Autres elements desactives
+echo [OK] Other elements disabled
 echo.
 
 :: ============================================================================
 :: RESTART EXPLORER
 :: ============================================================================
-echo [INFO] Redemarrage de l'Explorateur Windows...
+echo [INFO] Restarting Windows Explorer...
 taskkill /f /im explorer.exe >nul 2>&1
 start explorer.exe
-echo [OK] Explorateur redemarre
+echo [OK] Explorer restarted
 echo.
 
 :: ============================================================================
 :: FINISH
 :: ============================================================================
 echo ============================================
-echo   Terminé!
+echo   Complete!
 echo ============================================
 echo.
-echo Telemetrie et recommandations desactivees pour:
+echo Telemetry and recommendations disabled for:
 echo   - Windows
 echo   - Microsoft Office
 echo   - Microsoft Edge
 echo   - Widgets
-echo   - Menu Demarrer
-echo   - Barre des taches
-echo   - Explorateur de fichiers
+echo   - Start Menu
+echo   - Taskbar
+echo   - File Explorer
 echo.
-echo Un redemarrage est recommande pour appliquer
-echo tous les changements.
+echo A restart is recommended to apply
+echo all changes.
 echo.
 pause
 exit /b 0
