@@ -47,7 +47,7 @@ if %errorlevel% neq 0 (
     echo          2. Selectionnez "Executer en tant qu'administrateur"
     echo.
     echo          OU ouvrez PowerShell en admin et executez:
-    echo          irm https://votre-url.vercel.app ^| iex
+    echo          irm https://office-unnatended.vercel.app ^| iex
     echo.
     pause
     exit /b 1
