@@ -3,32 +3,32 @@
 :: Ohook Office Activation Script - Standalone Version
 :: Based on ohook by asdcorp - https://github.com/asdcorp/ohook
 :: ============================================================================
-:: Ce script active Microsoft Office en utilisant la methode Ohook
-:: Il place un fichier sppc.dll personnalise dans le dossier Office
+:: This script activates Microsoft Office using the Ohook method
+:: It places a custom sppc.dll file in the Office folder
 :: ============================================================================
 
 setlocal EnableDelayedExpansion
 title Ohook Office Activation
 
 :: ============================================================================
-:: CONFIGURATION - URLs des DLL (modifier si necessaire)
+:: CONFIGURATION - DLL URLs (modify if needed)
 :: ============================================================================
 set "OHOOK_VERSION=0.5"
 set "OHOOK_URL_BASE=https://github.com/asdcorp/ohook/releases/download/%OHOOK_VERSION%"
 set "DLL32_URL=%OHOOK_URL_BASE%/sppc32.dll"
 set "DLL64_URL=%OHOOK_URL_BASE%/sppc64.dll"
 
-:: SHA256 checksums pour verification
+:: SHA256 checksums for verification
 set "DLL32_HASH=09865ea5993215965e8f27a74b8a41d15fd0f60f5f404cb7a8b3c7757acdab02"
 set "DLL64_HASH=393a1fa26deb3663854e41f2b687c188a9eacd87b23f17ea09422c4715cb5a9f"
 
-:: Dossier temporaire
+:: Temp directory
 set "TEMP_DIR=%TEMP%\ohook_temp"
 set "DLL32_PATH=%TEMP_DIR%\sppc32.dll"
 set "DLL64_PATH=%TEMP_DIR%\sppc64.dll"
 
 :: ============================================================================
-:: VERIFICATION ADMIN
+:: ADMIN CHECK
 :: ============================================================================
 :check_admin
 echo.
@@ -40,20 +40,26 @@ echo.
 
 net session >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [ERREUR] Ce script necessite les droits Administrateur.
-    echo          Clic droit - Executer en tant qu'administrateur
+    echo [ERROR] This script requires Administrator privileges.
+    echo.
+    echo         SOLUTION:
+    echo         1. Right-click on the script
+    echo         2. Select "Run as administrator"
+    echo.
+    echo         OR open PowerShell as admin and run:
+    echo         irm https://office-unnatended.vercel.app ^| iex
     echo.
     pause
     exit /b 1
 )
-echo [OK] Droits administrateur confirmes
+echo [OK] Administrator privileges confirmed
 echo.
 
 :: ============================================================================
-:: DETECTION OFFICE
+:: OFFICE DETECTION
 :: ============================================================================
 :detect_office
-echo [INFO] Detection des installations Office...
+echo [INFO] Detecting Office installations...
 echo.
 
 set "OFFICE_FOUND=0"
@@ -67,7 +73,7 @@ for %%a in (
     "%ProgramFiles(x86)%\Microsoft Office\root\Office15"
 ) do (
     if exist "%%~a\OSPP.VBS" (
-        echo [TROUVE] %%~a
+        echo [FOUND] %%~a
         set "OFFICE_FOUND=1"
         set "OFFICE_PATHS=!OFFICE_PATHS!%%~a;"
     )
@@ -81,7 +87,7 @@ for %%a in (
     "%ProgramFiles(x86)%\Microsoft Office\Office15"
 ) do (
     if exist "%%~a\OSPP.VBS" (
-        echo [TROUVE] %%~a
+        echo [FOUND] %%~a
         set "OFFICE_FOUND=1"
         set "OFFICE_PATHS=!OFFICE_PATHS!%%~a;"
     )
@@ -93,7 +99,7 @@ for /f "tokens=2*" %%a in ('reg query "HKLM\SOFTWARE\Microsoft\Office\ClickToRun
     if defined C2R_PATH (
         for %%v in (Office16 Office15) do (
             if exist "!C2R_PATH!\root\%%v\OSPP.VBS" (
-                echo [TROUVE] !C2R_PATH!\root\%%v
+                echo [FOUND] !C2R_PATH!\root\%%v
                 set "OFFICE_FOUND=1"
                 set "OFFICE_PATHS=!OFFICE_PATHS!!C2R_PATH!\root\%%v;"
             )
@@ -103,54 +109,136 @@ for /f "tokens=2*" %%a in ('reg query "HKLM\SOFTWARE\Microsoft\Office\ClickToRun
 
 echo.
 if "%OFFICE_FOUND%"=="0" (
-    echo [ERREUR] Aucune installation Office detectee.
-    echo          Installez Office avant d'executer ce script.
+    echo [ERROR] No Office installation detected.
+    echo.
+    echo         POSSIBLE CAUSES:
+    echo         - Office is not installed on this computer
+    echo         - Office is installed in a non-standard location
+    echo         - Office installation is corrupted
+    echo.
+    echo         SOLUTIONS:
+    echo         1. Install Office using Office-Install-Activate.cmd
+    echo         2. Download Office from office.com
+    echo         3. If Office is installed, try to repair it:
+    echo            Settings ^> Apps ^> Microsoft Office ^> Modify ^> Repair
     echo.
     pause
     exit /b 1
 )
 
 :: ============================================================================
-:: TELECHARGEMENT DES DLL
+:: DOWNLOAD DLLs
 :: ============================================================================
 :download_dlls
-echo [INFO] Telechargement des fichiers Ohook...
+echo [INFO] Downloading Ohook files...
 echo.
 
 if not exist "%TEMP_DIR%" mkdir "%TEMP_DIR%"
 
 :: Download 64-bit DLL
-echo [INFO] Telechargement sppc64.dll...
-powershell -Command "$ProgressPreference = 'Continue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $wc = New-Object Net.WebClient; $wc.DownloadProgressChanged += { Write-Host -NoNewline \"`r       Progress: $($_.ProgressPercentage)%% - $([math]::Round($_.BytesReceived/1KB, 0)) KB\" }; $wc.DownloadFileAsync([Uri]'%DLL64_URL%', '%DLL64_PATH%'); while ($wc.IsBusy) { Start-Sleep -Milliseconds 100 }; Write-Host ''"
+echo [INFO] Downloading sppc64.dll...
+powershell -Command ^
+    "$ProgressPreference = 'SilentlyContinue';" ^
+    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
+    "$url = '%DLL64_URL%';" ^
+    "$out = '%DLL64_PATH%';" ^
+    "try {" ^
+    "    $wc = New-Object Net.WebClient;" ^
+    "    $wc.DownloadProgressChanged += {" ^
+    "        $pct = $_.ProgressPercentage;" ^
+    "        $rcv = [math]::Round($_.BytesReceived/1KB, 0);" ^
+    "        $width = $Host.UI.RawUI.WindowSize.Width - 25;" ^
+    "        if ($width -lt 10) { $width = 10 };" ^
+    "        $done = [math]::Floor($width * $pct / 100);" ^
+    "        $left = $width - $done;" ^
+    "        $bar = '[' + ('=' * $done) + (' ' * $left) + ']';" ^
+    "        Write-Host -NoNewline \"`r       $bar $pct%% ($rcv KB)\";" ^
+    "    };" ^
+    "    $wc.DownloadFileCompleted += { $global:done = $true };" ^
+    "    $global:done = $false;" ^
+    "    $wc.DownloadFileAsync([Uri]$url, $out);" ^
+    "    while (-not $global:done) { Start-Sleep -Milliseconds 50 };" ^
+    "    Write-Host '';" ^
+    "} catch { Write-Host \"Error: $($_.Exception.Message)\"; exit 1 }"
 
 if not exist "%DLL64_PATH%" (
-    echo [ERREUR] Echec du telechargement de sppc64.dll
-    echo          Verifiez votre connexion internet
-    echo          URL: %DLL64_URL%
+    echo.
+    echo [ERROR] Failed to download sppc64.dll
+    echo.
+    echo         POSSIBLE CAUSES:
+    echo         - No Internet connection
+    echo         - GitHub is inaccessible or blocked
+    echo         - Firewall/Proxy blocking connection
+    echo         - Antivirus blocking download
+    echo.
+    echo         SOLUTIONS:
+    echo         1. Check your Internet connection
+    echo         2. Try accessing github.com in a browser
+    echo         3. Temporarily disable firewall/antivirus
+    echo         4. If on corporate network, contact admin
+    echo.
+    echo         URL: %DLL64_URL%
+    echo.
     pause
     exit /b 1
 )
-echo [OK] sppc64.dll telecharge
+echo [OK] sppc64.dll downloaded
 
 :: Download 32-bit DLL
-echo [INFO] Telechargement sppc32.dll...
-powershell -Command "$ProgressPreference = 'Continue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $wc = New-Object Net.WebClient; $wc.DownloadProgressChanged += { Write-Host -NoNewline \"`r       Progress: $($_.ProgressPercentage)%% - $([math]::Round($_.BytesReceived/1KB, 0)) KB\" }; $wc.DownloadFileAsync([Uri]'%DLL32_URL%', '%DLL32_PATH%'); while ($wc.IsBusy) { Start-Sleep -Milliseconds 100 }; Write-Host ''"
+echo [INFO] Downloading sppc32.dll...
+powershell -Command ^
+    "$ProgressPreference = 'SilentlyContinue';" ^
+    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
+    "$url = '%DLL32_URL%';" ^
+    "$out = '%DLL32_PATH%';" ^
+    "try {" ^
+    "    $wc = New-Object Net.WebClient;" ^
+    "    $wc.DownloadProgressChanged += {" ^
+    "        $pct = $_.ProgressPercentage;" ^
+    "        $rcv = [math]::Round($_.BytesReceived/1KB, 0);" ^
+    "        $width = $Host.UI.RawUI.WindowSize.Width - 25;" ^
+    "        if ($width -lt 10) { $width = 10 };" ^
+    "        $done = [math]::Floor($width * $pct / 100);" ^
+    "        $left = $width - $done;" ^
+    "        $bar = '[' + ('=' * $done) + (' ' * $left) + ']';" ^
+    "        Write-Host -NoNewline \"`r       $bar $pct%% ($rcv KB)\";" ^
+    "    };" ^
+    "    $wc.DownloadFileCompleted += { $global:done = $true };" ^
+    "    $global:done = $false;" ^
+    "    $wc.DownloadFileAsync([Uri]$url, $out);" ^
+    "    while (-not $global:done) { Start-Sleep -Milliseconds 50 };" ^
+    "    Write-Host '';" ^
+    "} catch { Write-Host \"Error: $($_.Exception.Message)\"; exit 1 }"
 
 if not exist "%DLL32_PATH%" (
-    echo [ERREUR] Echec du telechargement de sppc32.dll
-    echo          Verifiez votre connexion internet
-    echo          URL: %DLL32_URL%
+    echo.
+    echo [ERROR] Failed to download sppc32.dll
+    echo.
+    echo         POSSIBLE CAUSES:
+    echo         - No Internet connection
+    echo         - GitHub is inaccessible or blocked
+    echo         - Firewall/Proxy blocking connection
+    echo         - Antivirus blocking download
+    echo.
+    echo         SOLUTIONS:
+    echo         1. Check your Internet connection
+    echo         2. Try accessing github.com in a browser
+    echo         3. Temporarily disable firewall/antivirus
+    echo         4. If on corporate network, contact admin
+    echo.
+    echo         URL: %DLL32_URL%
+    echo.
     pause
     exit /b 1
 )
-echo [OK] sppc32.dll telecharge
+echo [OK] sppc32.dll downloaded
 echo.
 
 :: ============================================================================
-:: VERIFICATION DES HASH (optionnel mais recommande)
+:: HASH VERIFICATION (optional but recommended)
 :: ============================================================================
 :verify_hash
-echo [INFO] Verification de l'integrite des fichiers...
+echo [INFO] Verifying file integrity...
 
 for /f "skip=1 tokens=* delims=" %%a in ('certutil -hashfile "%DLL64_PATH%" SHA256 2^>nul') do (
     set "COMPUTED_HASH=%%a"
@@ -159,9 +247,9 @@ for /f "skip=1 tokens=* delims=" %%a in ('certutil -hashfile "%DLL64_PATH%" SHA2
 :check_hash64
 set "COMPUTED_HASH=%COMPUTED_HASH: =%"
 if /i "%COMPUTED_HASH%"=="%DLL64_HASH%" (
-    echo [OK] sppc64.dll - Hash valide
+    echo [OK] sppc64.dll - Hash valid
 ) else (
-    echo [ATTENTION] sppc64.dll - Hash different (peut etre une nouvelle version^)
+    echo [WARNING] sppc64.dll - Different hash (may be a newer version^)
 )
 
 for /f "skip=1 tokens=* delims=" %%a in ('certutil -hashfile "%DLL32_PATH%" SHA256 2^>nul') do (
@@ -171,24 +259,24 @@ for /f "skip=1 tokens=* delims=" %%a in ('certutil -hashfile "%DLL32_PATH%" SHA2
 :check_hash32
 set "COMPUTED_HASH=%COMPUTED_HASH: =%"
 if /i "%COMPUTED_HASH%"=="%DLL32_HASH%" (
-    echo [OK] sppc32.dll - Hash valide
+    echo [OK] sppc32.dll - Hash valid
 ) else (
-    echo [ATTENTION] sppc32.dll - Hash different (peut etre une nouvelle version^)
+    echo [WARNING] sppc32.dll - Different hash (may be a newer version^)
 )
 echo.
 
 :: ============================================================================
-:: INSTALLATION DES DLL
+:: DLL INSTALLATION
 :: ============================================================================
 :install_dlls
-echo [INFO] Installation des fichiers Ohook...
+echo [INFO] Installing Ohook files...
 echo.
 
 :: Process each Office path
 for %%p in (%OFFICE_PATHS%) do (
     set "CURRENT_PATH=%%~p"
     if not "!CURRENT_PATH!"=="" (
-        echo [INFO] Traitement: !CURRENT_PATH!
+        echo [INFO] Processing: !CURRENT_PATH!
 
         :: Determine architecture
         echo !CURRENT_PATH! | findstr /i "x86" >nul
@@ -209,20 +297,20 @@ for %%p in (%OFFICE_PATHS%) do (
         :: Copy DLL
         copy /y "!DLL_SOURCE!" "!CURRENT_PATH!\sppc.dll" >nul 2>&1
         if !errorlevel! equ 0 (
-            echo        [OK] sppc.dll installe
+            echo        [OK] sppc.dll installed
         ) else (
-            echo        [ERREUR] Impossible de copier sppc.dll
-            echo                 Fermez toutes les applications Office et reessayez
+            echo        [ERROR] Failed to copy sppc.dll
+            echo                Close all Office applications and try again
         )
         echo.
     )
 )
 
 :: ============================================================================
-:: INSTALLATION DES LICENCES
+:: LICENSE INSTALLATION
 :: ============================================================================
 :install_licenses
-echo [INFO] Installation des licences Office...
+echo [INFO] Installing Office licenses...
 echo.
 
 :: Find Office C2R license path
@@ -242,7 +330,7 @@ if not defined LICENSE_PATH (
 
 if defined LICENSE_PATH (
     if exist "!LICENSE_PATH!" (
-        echo [INFO] Dossier licences: !LICENSE_PATH!
+        echo [INFO] License folder: !LICENSE_PATH!
 
         :: Install Grace licenses for all products
         for %%p in (
@@ -250,14 +338,14 @@ if defined LICENSE_PATH (
             "%ProgramFiles(x86)%\Microsoft Office\root\Office16"
         ) do (
             if exist "%%~p\OSPP.VBS" (
-                echo [INFO] Installation des licences via OSPP.VBS...
+                echo [INFO] Installing licenses via OSPP.VBS...
 
                 :: Install volume licenses
                 for /f "delims=" %%l in ('dir /b "!LICENSE_PATH!\*VL_*.xrm-ms" 2^>nul') do (
                     cscript //nologo "%%~p\OSPP.VBS" /inslic:"!LICENSE_PATH!\%%l" >nul 2>&1
                 )
 
-                echo [OK] Licences installees
+                echo [OK] Licenses installed
             )
         )
     )
@@ -268,7 +356,7 @@ echo.
 :: ACTIVATION
 :: ============================================================================
 :activate
-echo [INFO] Activation d'Office...
+echo [INFO] Activating Office...
 echo.
 
 :: Try to activate via OSPP
@@ -279,7 +367,7 @@ for %%p in (
     "%ProgramFiles(x86)%\Microsoft Office\Office16"
 ) do (
     if exist "%%~p\OSPP.VBS" (
-        echo [INFO] Utilisation de: %%~p\OSPP.VBS
+        echo [INFO] Using: %%~p\OSPP.VBS
 
         :: Set KMS host (local activation via Ohook)
         cscript //nologo "%%~p\OSPP.VBS" /sethst:127.0.0.1 >nul 2>&1
@@ -296,7 +384,7 @@ for %%p in (
 :: ============================================================================
 :verify
 echo.
-echo [INFO] Verification du statut d'activation...
+echo [INFO] Verifying activation status...
 echo.
 echo ============================================
 
@@ -313,29 +401,29 @@ for %%p in (
 )
 
 :: ============================================================================
-:: NETTOYAGE
+:: CLEANUP
 :: ============================================================================
 :cleanup
 echo.
 echo ============================================
 echo.
-echo [INFO] Nettoyage des fichiers temporaires...
+echo [INFO] Cleaning up temporary files...
 rd /s /q "%TEMP_DIR%" 2>nul
-echo [OK] Nettoyage termine
+echo [OK] Cleanup complete
 echo.
 
 :: ============================================================================
-:: FIN
+:: END
 :: ============================================================================
 :end
 echo ============================================
-echo   Activation Ohook terminee!
+echo   Ohook Activation Complete!
 echo ============================================
 echo.
-echo Si l'activation a echoue, essayez:
-echo   1. Fermez toutes les applications Office
-echo   2. Relancez ce script en administrateur
-echo   3. Redemarrez l'ordinateur et reessayez
+echo If activation failed, try:
+echo   1. Close all Office applications
+echo   2. Re-run this script as administrator
+echo   3. Restart your computer and try again
 echo.
 echo Source: https://github.com/asdcorp/ohook
 echo.

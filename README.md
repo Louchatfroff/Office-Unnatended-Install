@@ -1,143 +1,143 @@
 # Office Unattended Installation and Activation
 
-Scripts pour installer et activer Microsoft Office de manière automatique (unattended).
+Scripts for automatic (unattended) installation and activation of Microsoft Office.
 
-Basé sur [ohook par asdcorp](https://github.com/asdcorp/ohook) pour l'activation.
+Based on [ohook by asdcorp](https://github.com/asdcorp/ohook) for activation.
 
-## Utilisation rapide (Recommandé)
+## Quick Start (Recommended)
 
-Ouvrez PowerShell et exécutez :
+Open PowerShell and run:
 
 ```powershell
 irm https://office-unnatended.vercel.app | iex
 ```
 
-Ou avec l'URL GitHub directe :
+Or with the direct GitHub URL:
 
 ```powershell
 irm https://raw.githubusercontent.com/Louchatfroff/Office-Unnatended-Install/main/start.ps1 | iex
 ```
 
-> **Note:** La configuration XML est générée automatiquement dans le dossier temporaire à chaque exécution. Aucun fichier supplémentaire n'est nécessaire.
+> **Note:** The XML configuration is automatically generated in the temp folder during each run. No additional files are required.
 
-## Utilisation locale
+## Local Usage
 
-### Installation automatique complèt
+### Full Automatic Installation
 
-1. **Clic droit** sur `Office-Install-Activate.cmd`
-2. Sélectionner **"Exécuter en tant qu'administrateur"**
-3. Attendre la fin de l'installation et activation
+1. **Right-click** on `Office-Install-Activate.cmd`
+2. Select **"Run as administrator"**
+3. Wait for installation and activation to complete
 
-### Version avec menu
+### Interactive Menu Version
 
-1. **Clic droit** sur `Office-Menu-Install.cmd`
-2. Sélectionner **"Exécuter en tant qu'administrateur"**
-3. Choisir l'option désirée dans le menu
+1. **Right-click** on `Office-Menu-Install.cmd`
+2. Select **"Run as administrator"**
+3. Choose the desired option from the menu
 
-### Activation uniquement
+### Activation Only
 
-Si Office est déjà installé :
+If Office is already installed:
 
 ```batch
-:: Version détaillée avec logs
+:: Detailed version with logs
 Ohook-Activate.cmd
 
-:: Version silencieuse
+:: Silent version
 Ohook-Activate-Silent.cmd
 
-:: Version silencieuse avec logs
+:: Silent version with logs
 Ohook-Activate-Silent.cmd /log
 ```
 
-## Désactivation de la télémétrie
+## Disabling Telemetry
 
-Le script `Disable-Telemetry.cmd` désactive :
+The `Disable-Telemetry.cmd` script disables:
 
-**Télémétrie :**
-- Windows (DiagTrack, données de diagnostic, publicité)
-- Microsoft Office (feedback, données client, LinkedIn)
-- Microsoft Edge (métriques, expériences, SmartScreen)
+**Telemetry:**
+- Windows (DiagTrack, diagnostic data, advertising)
+- Microsoft Office (feedback, customer data, LinkedIn)
+- Microsoft Edge (metrics, experiments, SmartScreen)
 
-**Recommandations et widgets :**
-- Widgets Windows 11
-- Suggestions dans le menu Démarrer
-- Recommandations dans l'Explorateur
-- Recherche Bing dans la barre des tâches
+**Recommendations and widgets:**
+- Windows 11 Widgets
+- Start Menu suggestions
+- Explorer recommendations
+- Bing search in taskbar
 - Copilot
-- Chat Teams dans la barre des tâches
+- Teams chat in taskbar
 
-### URLs à configurer
+### URLs to Configure
 
-Dans les scripts d'installation, configurez ces variables :
+In the installation scripts, configure these variables:
 
 ```batch
-set "OHOOK_SCRIPT_URL=https://raw.githubusercontent.com/VOTRE_USER/VOTRE_REPO/main/Ohook-Activate.cmd"
-set "TELEMETRY_SCRIPT_URL=https://raw.githubusercontent.com/VOTRE_USER/VOTRE_REPO/main/Disable-Telemetry.cmd"
+set "OHOOK_SCRIPT_URL=https://raw.githubusercontent.com/YOUR_USER/YOUR_REPO/main/Ohook-Activate.cmd"
+set "TELEMETRY_SCRIPT_URL=https://raw.githubusercontent.com/YOUR_USER/YOUR_REPO/main/Disable-Telemetry.cmd"
 ```
 
-## Comment fonctionne Ohook
+## How Ohook Works
 
-Ohook fonctionne en plaçant un fichier `sppc.dll` personnalisé dans le dossier Office. Ce fichier intercepte les appels de vérification d'activation et retourne toujours que Office est activé.
+Ohook works by placing a custom `sppc.dll` file in the Office folder. This file intercepts activation verification calls and always returns that Office is activated.
 
-**Avantages :**
-- Ne modifie pas les fichiers système Windows
-- Survit aux mises à jour Office
-- Ne nécessite pas de serveur KMS
+**Advantages:**
+- Does not modify Windows system files
+- Survives Office updates
+- Does not require a KMS server
 
-**Fichiers utilisés :**
+**Files used:**
 - `sppc64.dll` (64-bit) - SHA256: `393a1fa26deb3663854e41f2b687c188a9eacd87b23f17ea09422c4715cb5a9f`
 - `sppc32.dll` (32-bit) - SHA256: `09865ea5993215965e8f27a74b8a41d15fd0f60f5f404cb7a8b3c7757acdab02`
 
 ## Configuration
 
-### Modifier la version d'Office
+### Change Office Version
 
-Éditer `Office-Install-Activate.cmd` et modifier ces variables :
+Edit `Office-Install-Activate.cmd` and modify these variables:
 
 ```batch
 :: Office Edition
 set "OFFICE_PRODUCT=O365ProPlusRetail"
 
-:: Autres options :
-:: O365ProPlusRetail    - Office 365 ProPlus (recommandé)
+:: Other options:
+:: O365ProPlusRetail    - Office 365 ProPlus (recommended)
 :: ProPlus2021Volume    - Office 2021 LTSC Professional Plus
 :: ProPlus2019Volume    - Office 2019 Professional Plus
 :: Standard2021Volume   - Office 2021 Standard
 ```
 
-### Modifier la langue
+### Change Language
 
 ```batch
-set "OFFICE_LANG=fr-fr"
+set "OFFICE_LANG=en-us"
 
-:: Autres langues :
-:: en-us (Anglais)
-:: de-de (Allemand)
-:: es-es (Espagnol)
-:: it-it (Italien)
+:: Other languages:
+:: fr-fr (French)
+:: de-de (German)
+:: es-es (Spanish)
+:: it-it (Italian)
 ```
 
-### Modifier l'architecture
+### Change Architecture
 
 ```batch
 set "OFFICE_ARCH=64"
 
-:: Options : 64 ou 32
+:: Options: 64 or 32
 ```
 
-### Exclure des applications
+### Exclude Applications
 
 ```batch
 set "EXCLUDE_APPS=Publisher,Access,OneDrive,Teams"
 
-:: Applications disponibles :
+:: Available applications:
 :: Access, Excel, OneDrive, OneNote, Outlook
 :: PowerPoint, Publisher, Word, Teams
 ```
 
-### Modifier l'URL des DLL Ohook
+### Change Ohook DLL URL
 
-Dans `Ohook-Activate.cmd` ou `Ohook-Activate-Silent.cmd` :
+In `Ohook-Activate.cmd` or `Ohook-Activate-Silent.cmd`:
 
 ```batch
 set "OHOOK_VERSION=0.5"
@@ -145,16 +145,16 @@ set "DLL64_URL=https://github.com/asdcorp/ohook/releases/download/%OHOOK_VERSION
 set "DLL32_URL=https://github.com/asdcorp/ohook/releases/download/%OHOOK_VERSION%/sppc32.dll"
 ```
 
-## Prérequis
+## Requirements
 
-- Windows 10/11 (ou Windows Server 2016+)
-- Connexion Internet
-- Droits Administrateur
+- Windows 10/11 (or Windows Server 2016+)
+- Internet connection
+- Administrator privileges
 - PowerShell 5.0+
 
-## Produits supportés
+## Supported Products
 
-| Produit | ID |
+| Product | ID |
 |---------|-----|
 | Office 365 ProPlus | `O365ProPlusRetail` |
 | Office 2021 Pro Plus | `ProPlus2021Volume` |
@@ -164,37 +164,37 @@ set "DLL32_URL=https://github.com/asdcorp/ohook/releases/download/%OHOOK_VERSION
 | Visio 2021 | `VisioPro2021Volume` |
 | Project 2021 | `ProjectPro2021Volume` |
 
-## Dépannage
+## Troubleshooting
 
-### L'activation échoue
+### Activation Fails
 
-1. Fermez toutes les applications Office
-2. Relancez le script d'activation en administrateur
-3. Redémarrez l'ordinateur et réessayez
+1. Close all Office applications
+2. Rerun the activation script as administrator
+3. Restart the computer and try again
 
-### Vérifier le statut d'activation
+### Check Activation Status
 
 ```cmd
 cscript "%ProgramFiles%\Microsoft Office\root\Office16\OSPP.VBS" /dstatus
 ```
 
-### Réinstaller proprement
+### Clean Reinstall
 
-1. Désinstaller Office via les paramètres Windows
-2. Utiliser [Office Removal Tool](https://aka.ms/SaRA-OfficeUninstallFromPC)
-3. Relancer le script d'installation
+1. Uninstall Office via Windows Settings
+2. Use [Office Removal Tool](https://aka.ms/SaRA-OfficeUninstallFromPC)
+3. Rerun the installation script
 
-### Les DLL ne se téléchargent pas
+### DLLs Won't Download
 
-Vérifiez que GitHub n'est pas bloqué sur votre réseau. Vous pouvez télécharger manuellement les DLL depuis :
+Check that GitHub is not blocked on your network. You can manually download the DLLs from:
 - https://github.com/asdcorp/ohook/releases
 
 ## Sources
 
-- [ohook par asdcorp](https://github.com/asdcorp/ohook) - Code source des DLL d'activation
-- [Office Deployment Tool](https://docs.microsoft.com/deployoffice/overview-office-deployment-tool) - Outil d'installation Office
-- [MAS Documentation](https://massgrave.dev/ohook) - Documentation sur Ohook
+- [ohook by asdcorp](https://github.com/asdcorp/ohook) - Activation DLL source code
+- [Office Deployment Tool](https://docs.microsoft.com/deployoffice/overview-office-deployment-tool) - Office installation tool
+- [MAS Documentation](https://massgrave.dev/ohook) - Ohook documentation
 
-## Avertissement
+## Disclaimer
 
-Ce script est fourni à des fins éducatives. Utilisez-le de manière responsable et conformément aux lois en vigueur dans votre pays.
+This script is provided for educational purposes. Use it responsibly and in compliance with the laws in your country.

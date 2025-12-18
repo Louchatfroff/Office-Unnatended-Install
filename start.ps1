@@ -3,7 +3,7 @@
     Office Unattended Installation and Activation Script
 .DESCRIPTION
     Installs and activates Microsoft Office using Ohook method
-    Usage: irm https://YOUR-URL.vercel.app | iex
+    Usage: irm https://office-unnatended.vercel.app | iex
 .NOTES
     Based on ohook by asdcorp - https://github.com/asdcorp/ohook
 #>
@@ -22,8 +22,8 @@ function Test-Admin {
 
 # Elevate if needed
 if (-not (Test-Admin)) {
-    Write-Host "`n[!] Ce script necessite les droits Administrateur." -ForegroundColor Yellow
-    Write-Host "[*] Relancement en tant qu'Administrateur...`n" -ForegroundColor Cyan
+    Write-Host "`n[!] This script requires Administrator privileges." -ForegroundColor Yellow
+    Write-Host "[*] Relaunching as Administrator...`n" -ForegroundColor Cyan
 
     Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; iex ((New-Object Net.WebClient).DownloadString('$BaseURL/start.ps1'))`"" -Verb RunAs
     exit
@@ -37,20 +37,29 @@ Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
 
 try {
-    Write-Host "[*] Telechargement du script d'installation..." -ForegroundColor Cyan
+    Write-Host "[*] Downloading installation script..." -ForegroundColor Cyan
     $scriptPath = "$env:TEMP\Office-Install-Activate.cmd"
     $url = "$BaseURL/Office-Install-Activate.cmd"
 
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-    # Download with progress
+    # Download with dynamic progress bar
     $wc = New-Object Net.WebClient
-    $downloadComplete = $false
+    $global:downloadComplete = $false
 
     Register-ObjectEvent -InputObject $wc -EventName DownloadProgressChanged -Action {
         $percent = $EventArgs.ProgressPercentage
         $received = [math]::Round($EventArgs.BytesReceived / 1KB, 0)
-        Write-Host -NoNewline "`r       Progress: $percent% - $received KB"
+
+        # Dynamic width based on window size
+        $width = $Host.UI.RawUI.WindowSize.Width - 25
+        if ($width -lt 10) { $width = 10 }
+
+        $done = [math]::Floor($width * $percent / 100)
+        $left = $width - $done
+        $bar = '[' + ('=' * $done) + (' ' * $left) + ']'
+
+        Write-Host -NoNewline "`r       $bar $percent% ($received KB)"
     } | Out-Null
 
     Register-ObjectEvent -InputObject $wc -EventName DownloadFileCompleted -Action {
@@ -65,8 +74,8 @@ try {
     Write-Host ""
 
     if (Test-Path $scriptPath) {
-        Write-Host "[OK] Script telecharge" -ForegroundColor Green
-        Write-Host "[*] Lancement de l'installation...`n" -ForegroundColor Cyan
+        Write-Host "[OK] Script downloaded" -ForegroundColor Green
+        Write-Host "[*] Launching installation...`n" -ForegroundColor Cyan
 
         # Execute CMD script
         Start-Process cmd.exe -ArgumentList "/c `"$scriptPath`"" -Wait
@@ -74,8 +83,32 @@ try {
         # Cleanup
         Remove-Item $scriptPath -Force -ErrorAction SilentlyContinue
     } else {
-        Write-Host "[ERREUR] Echec du telechargement" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "[ERROR] Download failed" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "         POSSIBLE CAUSES:" -ForegroundColor Yellow
+        Write-Host "         - No Internet connection"
+        Write-Host "         - GitHub is unreachable or blocked"
+        Write-Host "         - Firewall/Proxy blocking connection"
+        Write-Host ""
+        Write-Host "         SOLUTIONS:" -ForegroundColor Yellow
+        Write-Host "         1. Check your Internet connection"
+        Write-Host "         2. Try accessing github.com"
+        Write-Host "         3. Temporarily disable firewall"
+        Write-Host ""
     }
 } catch {
-    Write-Host "[ERREUR] $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "[ERROR] $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "         POSSIBLE CAUSES:" -ForegroundColor Yellow
+    Write-Host "         - Network error"
+    Write-Host "         - PowerShell blocked by security policy"
+    Write-Host "         - Antivirus interference"
+    Write-Host ""
+    Write-Host "         SOLUTIONS:" -ForegroundColor Yellow
+    Write-Host "         1. Retry the command"
+    Write-Host "         2. Run: Set-ExecutionPolicy Bypass -Scope Process"
+    Write-Host "         3. Temporarily disable antivirus"
+    Write-Host ""
 }

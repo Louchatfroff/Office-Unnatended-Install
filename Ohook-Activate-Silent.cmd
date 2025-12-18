@@ -4,7 +4,7 @@
 :: Based on ohook by asdcorp - https://github.com/asdcorp/ohook
 :: ============================================================================
 :: Usage: Ohook-Activate-Silent.cmd [/log]
-::   /log  - Affiche les messages (sinon completement silencieux)
+::   /log  - Show messages (otherwise completely silent)
 :: ============================================================================
 
 setlocal EnableDelayedExpansion
@@ -28,42 +28,86 @@ set "RESULT=0"
 :: ============================================================================
 net session >nul 2>&1
 if %errorlevel% neq 0 (
-    if "%SILENT%"=="0" echo [ERREUR] Droits administrateur requis
+    if "%SILENT%"=="0" echo [ERROR] Administrator rights required
     exit /b 1
 )
 
 :: ============================================================================
 :: MAIN
 :: ============================================================================
-if "%SILENT%"=="0" echo [INFO] Demarrage de l'activation Ohook...
+if "%SILENT%"=="0" echo [INFO] Starting Ohook activation...
 
 :: Create temp directory
 mkdir "%TEMP_DIR%" 2>nul
 
 :: Download DLLs
 if "%SILENT%"=="0" (
-    echo [INFO] Telechargement sppc64.dll...
-    powershell -Command "$ProgressPreference = 'Continue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $wc = New-Object Net.WebClient; $wc.DownloadProgressChanged += { Write-Host -NoNewline \"`r       Progress: $($_.ProgressPercentage)%% - $([math]::Round($_.BytesReceived/1KB, 0)) KB\" }; $wc.DownloadFileAsync([Uri]'%DLL64_URL%', '%TEMP_DIR%\sppc64.dll'); while ($wc.IsBusy) { Start-Sleep -Milliseconds 100 }; Write-Host ''"
-    echo [INFO] Telechargement sppc32.dll...
-    powershell -Command "$ProgressPreference = 'Continue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $wc = New-Object Net.WebClient; $wc.DownloadProgressChanged += { Write-Host -NoNewline \"`r       Progress: $($_.ProgressPercentage)%% - $([math]::Round($_.BytesReceived/1KB, 0)) KB\" }; $wc.DownloadFileAsync([Uri]'%DLL32_URL%', '%TEMP_DIR%\sppc32.dll'); while ($wc.IsBusy) { Start-Sleep -Milliseconds 100 }; Write-Host ''"
+    echo [INFO] Downloading sppc64.dll...
+    powershell -Command ^
+        "$ProgressPreference = 'SilentlyContinue';" ^
+        "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
+        "$url = '%DLL64_URL%';" ^
+        "$out = '%TEMP_DIR%\sppc64.dll';" ^
+        "try {" ^
+        "    $wc = New-Object Net.WebClient;" ^
+        "    $wc.DownloadProgressChanged += {" ^
+        "        $pct = $_.ProgressPercentage;" ^
+        "        $rcv = [math]::Round($_.BytesReceived/1KB, 0);" ^
+        "        $width = $Host.UI.RawUI.WindowSize.Width - 25;" ^
+        "        if ($width -lt 10) { $width = 10 };" ^
+        "        $done = [math]::Floor($width * $pct / 100);" ^
+        "        $left = $width - $done;" ^
+        "        $bar = '[' + ('=' * $done) + (' ' * $left) + ']';" ^
+        "        Write-Host -NoNewline \"`r       $bar $pct%% ($rcv KB)\";" ^
+        "    };" ^
+        "    $wc.DownloadFileCompleted += { $global:done = $true };" ^
+        "    $global:done = $false;" ^
+        "    $wc.DownloadFileAsync([Uri]$url, $out);" ^
+        "    while (-not $global:done) { Start-Sleep -Milliseconds 50 };" ^
+        "    Write-Host '';" ^
+        "} catch { Write-Host \"Error: $($_.Exception.Message)\" }"
+    echo [INFO] Downloading sppc32.dll...
+    powershell -Command ^
+        "$ProgressPreference = 'SilentlyContinue';" ^
+        "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
+        "$url = '%DLL32_URL%';" ^
+        "$out = '%TEMP_DIR%\sppc32.dll';" ^
+        "try {" ^
+        "    $wc = New-Object Net.WebClient;" ^
+        "    $wc.DownloadProgressChanged += {" ^
+        "        $pct = $_.ProgressPercentage;" ^
+        "        $rcv = [math]::Round($_.BytesReceived/1KB, 0);" ^
+        "        $width = $Host.UI.RawUI.WindowSize.Width - 25;" ^
+        "        if ($width -lt 10) { $width = 10 };" ^
+        "        $done = [math]::Floor($width * $pct / 100);" ^
+        "        $left = $width - $done;" ^
+        "        $bar = '[' + ('=' * $done) + (' ' * $left) + ']';" ^
+        "        Write-Host -NoNewline \"`r       $bar $pct%% ($rcv KB)\";" ^
+        "    };" ^
+        "    $wc.DownloadFileCompleted += { $global:done = $true };" ^
+        "    $global:done = $false;" ^
+        "    $wc.DownloadFileAsync([Uri]$url, $out);" ^
+        "    while (-not $global:done) { Start-Sleep -Milliseconds 50 };" ^
+        "    Write-Host '';" ^
+        "} catch { Write-Host \"Error: $($_.Exception.Message)\" }"
 ) else (
     powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('%DLL64_URL%', '%TEMP_DIR%\sppc64.dll')" 2>nul
     powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('%DLL32_URL%', '%TEMP_DIR%\sppc32.dll')" 2>nul
 )
 
 if not exist "%TEMP_DIR%\sppc64.dll" (
-    if "%SILENT%"=="0" echo [ERREUR] Echec telechargement sppc64.dll
+    if "%SILENT%"=="0" echo [ERROR] Failed to download sppc64.dll
     set "RESULT=1"
     goto :cleanup
 )
 if not exist "%TEMP_DIR%\sppc32.dll" (
-    if "%SILENT%"=="0" echo [ERREUR] Echec telechargement sppc32.dll
+    if "%SILENT%"=="0" echo [ERROR] Failed to download sppc32.dll
     set "RESULT=1"
     goto :cleanup
 )
 
 :: Find and process Office installations
-if "%SILENT%"=="0" echo [INFO] Detection et activation d'Office...
+if "%SILENT%"=="0" echo [INFO] Detecting and activating Office...
 
 :: Office C2R 64-bit
 if exist "%ProgramFiles%\Microsoft Office\root\Office16" (
@@ -118,7 +162,7 @@ for /f "tokens=2*" %%a in ('reg query "HKLM\SOFTWARE\Microsoft\Office\ClickToRun
     )
 )
 
-if "%SILENT%"=="0" echo [OK] Activation Ohook terminee
+if "%SILENT%"=="0" echo [OK] Ohook activation completed
 
 :cleanup
 :: Cleanup
@@ -126,9 +170,9 @@ rd /s /q "%TEMP_DIR%" 2>nul
 
 if "%SILENT%"=="0" (
     if "%RESULT%"=="0" (
-        echo [OK] Succes
+        echo [OK] Success
     ) else (
-        echo [ERREUR] Echec
+        echo [ERROR] Failed
     )
 )
 
