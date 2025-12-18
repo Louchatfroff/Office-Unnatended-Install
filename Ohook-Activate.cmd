@@ -41,7 +41,13 @@ echo.
 net session >nul 2>&1
 if %errorlevel% neq 0 (
     echo [ERREUR] Ce script necessite les droits Administrateur.
-    echo          Clic droit - Executer en tant qu'administrateur
+    echo.
+    echo          SOLUTION:
+    echo          1. Clic droit sur le script
+    echo          2. Selectionnez "Executer en tant qu'administrateur"
+    echo.
+    echo          OU ouvrez PowerShell en admin et executez:
+    echo          irm https://votre-url.vercel.app ^| iex
     echo.
     pause
     exit /b 1
@@ -104,7 +110,17 @@ for /f "tokens=2*" %%a in ('reg query "HKLM\SOFTWARE\Microsoft\Office\ClickToRun
 echo.
 if "%OFFICE_FOUND%"=="0" (
     echo [ERREUR] Aucune installation Office detectee.
-    echo          Installez Office avant d'executer ce script.
+    echo.
+    echo          CAUSES POSSIBLES:
+    echo          - Office n'est pas installe sur cet ordinateur
+    echo          - Office est installe dans un emplacement non standard
+    echo          - L'installation d'Office est corrompue
+    echo.
+    echo          SOLUTIONS:
+    echo          1. Installez Office avec le script Office-Install-Activate.cmd
+    echo          2. Telechargez Office depuis office.com
+    echo          3. Si Office est installe, essayez de le reparer:
+    echo             Parametres ^> Applications ^> Microsoft Office ^> Modifier ^> Reparer
     echo.
     pause
     exit /b 1
@@ -121,12 +137,48 @@ if not exist "%TEMP_DIR%" mkdir "%TEMP_DIR%"
 
 :: Download 64-bit DLL
 echo [INFO] Telechargement sppc64.dll...
-powershell -Command "$ProgressPreference = 'Continue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $wc = New-Object Net.WebClient; $wc.DownloadProgressChanged += { Write-Host -NoNewline \"`r       Progress: $($_.ProgressPercentage)%% - $([math]::Round($_.BytesReceived/1KB, 0)) KB\" }; $wc.DownloadFileAsync([Uri]'%DLL64_URL%', '%DLL64_PATH%'); while ($wc.IsBusy) { Start-Sleep -Milliseconds 100 }; Write-Host ''"
+powershell -Command ^
+    "$ProgressPreference = 'SilentlyContinue';" ^
+    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
+    "$url = '%DLL64_URL%';" ^
+    "$out = '%DLL64_PATH%';" ^
+    "try {" ^
+    "    $wc = New-Object Net.WebClient;" ^
+    "    $wc.DownloadProgressChanged += {" ^
+    "        $pct = $_.ProgressPercentage;" ^
+    "        $rcv = [math]::Round($_.BytesReceived/1KB, 0);" ^
+    "        $width = $Host.UI.RawUI.WindowSize.Width - 25;" ^
+    "        if ($width -lt 10) { $width = 10 };" ^
+    "        $done = [math]::Floor($width * $pct / 100);" ^
+    "        $left = $width - $done;" ^
+    "        $bar = '[' + ('=' * $done) + (' ' * $left) + ']';" ^
+    "        Write-Host -NoNewline \"`r       $bar $pct%% ($rcv KB)\";" ^
+    "    };" ^
+    "    $wc.DownloadFileCompleted += { $global:done = $true };" ^
+    "    $global:done = $false;" ^
+    "    $wc.DownloadFileAsync([Uri]$url, $out);" ^
+    "    while (-not $global:done) { Start-Sleep -Milliseconds 50 };" ^
+    "    Write-Host '';" ^
+    "} catch { Write-Host \"Erreur: $($_.Exception.Message)\"; exit 1 }"
 
 if not exist "%DLL64_PATH%" (
+    echo.
     echo [ERREUR] Echec du telechargement de sppc64.dll
-    echo          Verifiez votre connexion internet
+    echo.
+    echo          CAUSES POSSIBLES:
+    echo          - Pas de connexion Internet
+    echo          - GitHub est inaccessible ou bloque
+    echo          - Pare-feu/Proxy bloquant la connexion
+    echo          - Antivirus bloquant le telechargement
+    echo.
+    echo          SOLUTIONS:
+    echo          1. Verifiez votre connexion Internet
+    echo          2. Essayez d'acceder a github.com dans un navigateur
+    echo          3. Desactivez temporairement le pare-feu/antivirus
+    echo          4. Si vous etes sur un reseau d'entreprise, contactez l'admin
+    echo.
     echo          URL: %DLL64_URL%
+    echo.
     pause
     exit /b 1
 )
@@ -134,12 +186,48 @@ echo [OK] sppc64.dll telecharge
 
 :: Download 32-bit DLL
 echo [INFO] Telechargement sppc32.dll...
-powershell -Command "$ProgressPreference = 'Continue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $wc = New-Object Net.WebClient; $wc.DownloadProgressChanged += { Write-Host -NoNewline \"`r       Progress: $($_.ProgressPercentage)%% - $([math]::Round($_.BytesReceived/1KB, 0)) KB\" }; $wc.DownloadFileAsync([Uri]'%DLL32_URL%', '%DLL32_PATH%'); while ($wc.IsBusy) { Start-Sleep -Milliseconds 100 }; Write-Host ''"
+powershell -Command ^
+    "$ProgressPreference = 'SilentlyContinue';" ^
+    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
+    "$url = '%DLL32_URL%';" ^
+    "$out = '%DLL32_PATH%';" ^
+    "try {" ^
+    "    $wc = New-Object Net.WebClient;" ^
+    "    $wc.DownloadProgressChanged += {" ^
+    "        $pct = $_.ProgressPercentage;" ^
+    "        $rcv = [math]::Round($_.BytesReceived/1KB, 0);" ^
+    "        $width = $Host.UI.RawUI.WindowSize.Width - 25;" ^
+    "        if ($width -lt 10) { $width = 10 };" ^
+    "        $done = [math]::Floor($width * $pct / 100);" ^
+    "        $left = $width - $done;" ^
+    "        $bar = '[' + ('=' * $done) + (' ' * $left) + ']';" ^
+    "        Write-Host -NoNewline \"`r       $bar $pct%% ($rcv KB)\";" ^
+    "    };" ^
+    "    $wc.DownloadFileCompleted += { $global:done = $true };" ^
+    "    $global:done = $false;" ^
+    "    $wc.DownloadFileAsync([Uri]$url, $out);" ^
+    "    while (-not $global:done) { Start-Sleep -Milliseconds 50 };" ^
+    "    Write-Host '';" ^
+    "} catch { Write-Host \"Erreur: $($_.Exception.Message)\"; exit 1 }"
 
 if not exist "%DLL32_PATH%" (
+    echo.
     echo [ERREUR] Echec du telechargement de sppc32.dll
-    echo          Verifiez votre connexion internet
+    echo.
+    echo          CAUSES POSSIBLES:
+    echo          - Pas de connexion Internet
+    echo          - GitHub est inaccessible ou bloque
+    echo          - Pare-feu/Proxy bloquant la connexion
+    echo          - Antivirus bloquant le telechargement
+    echo.
+    echo          SOLUTIONS:
+    echo          1. Verifiez votre connexion Internet
+    echo          2. Essayez d'acceder a github.com dans un navigateur
+    echo          3. Desactivez temporairement le pare-feu/antivirus
+    echo          4. Si vous etes sur un reseau d'entreprise, contactez l'admin
+    echo.
     echo          URL: %DLL32_URL%
+    echo.
     pause
     exit /b 1
 )

@@ -43,9 +43,53 @@ mkdir "%TEMP_DIR%" 2>nul
 :: Download DLLs
 if "%SILENT%"=="0" (
     echo [INFO] Telechargement sppc64.dll...
-    powershell -Command "$ProgressPreference = 'Continue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $wc = New-Object Net.WebClient; $wc.DownloadProgressChanged += { Write-Host -NoNewline \"`r       Progress: $($_.ProgressPercentage)%% - $([math]::Round($_.BytesReceived/1KB, 0)) KB\" }; $wc.DownloadFileAsync([Uri]'%DLL64_URL%', '%TEMP_DIR%\sppc64.dll'); while ($wc.IsBusy) { Start-Sleep -Milliseconds 100 }; Write-Host ''"
+    powershell -Command ^
+        "$ProgressPreference = 'SilentlyContinue';" ^
+        "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
+        "$url = '%DLL64_URL%';" ^
+        "$out = '%TEMP_DIR%\sppc64.dll';" ^
+        "try {" ^
+        "    $wc = New-Object Net.WebClient;" ^
+        "    $wc.DownloadProgressChanged += {" ^
+        "        $pct = $_.ProgressPercentage;" ^
+        "        $rcv = [math]::Round($_.BytesReceived/1KB, 0);" ^
+        "        $width = $Host.UI.RawUI.WindowSize.Width - 25;" ^
+        "        if ($width -lt 10) { $width = 10 };" ^
+        "        $done = [math]::Floor($width * $pct / 100);" ^
+        "        $left = $width - $done;" ^
+        "        $bar = '[' + ('=' * $done) + (' ' * $left) + ']';" ^
+        "        Write-Host -NoNewline \"`r       $bar $pct%% ($rcv KB)\";" ^
+        "    };" ^
+        "    $wc.DownloadFileCompleted += { $global:done = $true };" ^
+        "    $global:done = $false;" ^
+        "    $wc.DownloadFileAsync([Uri]$url, $out);" ^
+        "    while (-not $global:done) { Start-Sleep -Milliseconds 50 };" ^
+        "    Write-Host '';" ^
+        "} catch { Write-Host \"Erreur: $($_.Exception.Message)\" }"
     echo [INFO] Telechargement sppc32.dll...
-    powershell -Command "$ProgressPreference = 'Continue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $wc = New-Object Net.WebClient; $wc.DownloadProgressChanged += { Write-Host -NoNewline \"`r       Progress: $($_.ProgressPercentage)%% - $([math]::Round($_.BytesReceived/1KB, 0)) KB\" }; $wc.DownloadFileAsync([Uri]'%DLL32_URL%', '%TEMP_DIR%\sppc32.dll'); while ($wc.IsBusy) { Start-Sleep -Milliseconds 100 }; Write-Host ''"
+    powershell -Command ^
+        "$ProgressPreference = 'SilentlyContinue';" ^
+        "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
+        "$url = '%DLL32_URL%';" ^
+        "$out = '%TEMP_DIR%\sppc32.dll';" ^
+        "try {" ^
+        "    $wc = New-Object Net.WebClient;" ^
+        "    $wc.DownloadProgressChanged += {" ^
+        "        $pct = $_.ProgressPercentage;" ^
+        "        $rcv = [math]::Round($_.BytesReceived/1KB, 0);" ^
+        "        $width = $Host.UI.RawUI.WindowSize.Width - 25;" ^
+        "        if ($width -lt 10) { $width = 10 };" ^
+        "        $done = [math]::Floor($width * $pct / 100);" ^
+        "        $left = $width - $done;" ^
+        "        $bar = '[' + ('=' * $done) + (' ' * $left) + ']';" ^
+        "        Write-Host -NoNewline \"`r       $bar $pct%% ($rcv KB)\";" ^
+        "    };" ^
+        "    $wc.DownloadFileCompleted += { $global:done = $true };" ^
+        "    $global:done = $false;" ^
+        "    $wc.DownloadFileAsync([Uri]$url, $out);" ^
+        "    while (-not $global:done) { Start-Sleep -Milliseconds 50 };" ^
+        "    Write-Host '';" ^
+        "} catch { Write-Host \"Erreur: $($_.Exception.Message)\" }"
 ) else (
     powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('%DLL64_URL%', '%TEMP_DIR%\sppc64.dll')" 2>nul
     powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('%DLL32_URL%', '%TEMP_DIR%\sppc32.dll')" 2>nul

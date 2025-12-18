@@ -125,10 +125,45 @@ if not exist "%WORK_DIR%" mkdir "%WORK_DIR%"
 
 :: Download ODT
 echo [INFO] Telechargement de Office Deployment Tool...
-powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('https://officecdn.microsoft.com/pr/wsus/setup.exe', '%ODT_EXE%')"
+powershell -Command ^
+    "$ProgressPreference = 'SilentlyContinue';" ^
+    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
+    "$url = 'https://officecdn.microsoft.com/pr/wsus/setup.exe';" ^
+    "$out = '%ODT_EXE%';" ^
+    "try {" ^
+    "    $wc = New-Object Net.WebClient;" ^
+    "    $wc.Headers.Add('User-Agent', 'Mozilla/5.0');" ^
+    "    $wc.DownloadProgressChanged += {" ^
+    "        $pct = $_.ProgressPercentage;" ^
+    "        $rcv = [math]::Round($_.BytesReceived/1MB, 2);" ^
+    "        $width = $Host.UI.RawUI.WindowSize.Width - 30;" ^
+    "        if ($width -lt 10) { $width = 10 };" ^
+    "        $done = [math]::Floor($width * $pct / 100);" ^
+    "        $left = $width - $done;" ^
+    "        $bar = '[' + ('=' * $done) + (' ' * $left) + ']';" ^
+    "        Write-Host -NoNewline \"`r       $bar $pct%% ($rcv MB)\";" ^
+    "    };" ^
+    "    $wc.DownloadFileCompleted += { $global:done = $true };" ^
+    "    $global:done = $false;" ^
+    "    $wc.DownloadFileAsync([Uri]$url, $out);" ^
+    "    while (-not $global:done) { Start-Sleep -Milliseconds 50 };" ^
+    "    Write-Host '';" ^
+    "} catch { Write-Host \"Erreur: $($_.Exception.Message)\"; exit 1 }"
 
 if not exist "%ODT_EXE%" (
+    echo.
     echo [ERROR] Echec du telechargement de ODT
+    echo.
+    echo         CAUSES POSSIBLES:
+    echo         - Pas de connexion Internet
+    echo         - Serveur Microsoft indisponible
+    echo         - Pare-feu/Proxy bloquant la connexion
+    echo.
+    echo         SOLUTIONS:
+    echo         1. Verifiez votre connexion Internet
+    echo         2. Desactivez temporairement le pare-feu/antivirus
+    echo         3. Reessayez plus tard
+    echo.
     pause
     goto menu
 )
@@ -242,14 +277,47 @@ echo [INFO] Telechargement du script Ohook...
 
 set "OHOOK_SCRIPT_URL=https://raw.githubusercontent.com/Louchatfroff/Office-Unnatended-Install/main/Ohook-Activate.cmd"
 
-powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('%OHOOK_SCRIPT_URL%', '%TEMP%\Ohook-Activate.cmd')" 2>nul
+powershell -Command ^
+    "$ProgressPreference = 'SilentlyContinue';" ^
+    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
+    "$url = '%OHOOK_SCRIPT_URL%';" ^
+    "$out = '%TEMP%\Ohook-Activate.cmd';" ^
+    "try {" ^
+    "    $wc = New-Object Net.WebClient;" ^
+    "    $wc.DownloadProgressChanged += {" ^
+    "        $pct = $_.ProgressPercentage;" ^
+    "        $rcv = [math]::Round($_.BytesReceived/1KB, 0);" ^
+    "        $width = $Host.UI.RawUI.WindowSize.Width - 25;" ^
+    "        if ($width -lt 10) { $width = 10 };" ^
+    "        $done = [math]::Floor($width * $pct / 100);" ^
+    "        $left = $width - $done;" ^
+    "        $bar = '[' + ('=' * $done) + (' ' * $left) + ']';" ^
+    "        Write-Host -NoNewline \"`r       $bar $pct%% ($rcv KB)\";" ^
+    "    };" ^
+    "    $wc.DownloadFileCompleted += { $global:done = $true };" ^
+    "    $global:done = $false;" ^
+    "    $wc.DownloadFileAsync([Uri]$url, $out);" ^
+    "    while (-not $global:done) { Start-Sleep -Milliseconds 50 };" ^
+    "    Write-Host '';" ^
+    "} catch { Write-Host \"Erreur: $($_.Exception.Message)\" }" 2>nul
 
 if exist "%TEMP%\Ohook-Activate.cmd" (
     echo [OK] Script telecharge
     call "%TEMP%\Ohook-Activate.cmd"
     del /f /q "%TEMP%\Ohook-Activate.cmd" 2>nul
 ) else (
+    echo.
     echo [ERROR] Echec du telechargement du script Ohook
+    echo.
+    echo         CAUSES POSSIBLES:
+    echo         - GitHub est inaccessible
+    echo         - Pare-feu bloquant raw.githubusercontent.com
+    echo.
+    echo         SOLUTIONS:
+    echo         1. Verifiez votre connexion Internet
+    echo         2. Essayez d'acceder a github.com
+    echo         3. Desactivez temporairement le pare-feu
+    echo.
     echo         URL: %OHOOK_SCRIPT_URL%
 )
 goto :eof
@@ -279,14 +347,46 @@ echo [INFO] Telechargement du script de desactivation...
 
 set "TELEMETRY_SCRIPT_URL=https://raw.githubusercontent.com/Louchatfroff/Office-Unnatended-Install/main/Disable-Telemetry.cmd"
 
-powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('%TELEMETRY_SCRIPT_URL%', '%TEMP%\Disable-Telemetry.cmd')" 2>nul
+powershell -Command ^
+    "$ProgressPreference = 'SilentlyContinue';" ^
+    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
+    "$url = '%TELEMETRY_SCRIPT_URL%';" ^
+    "$out = '%TEMP%\Disable-Telemetry.cmd';" ^
+    "try {" ^
+    "    $wc = New-Object Net.WebClient;" ^
+    "    $wc.DownloadProgressChanged += {" ^
+    "        $pct = $_.ProgressPercentage;" ^
+    "        $rcv = [math]::Round($_.BytesReceived/1KB, 0);" ^
+    "        $width = $Host.UI.RawUI.WindowSize.Width - 25;" ^
+    "        if ($width -lt 10) { $width = 10 };" ^
+    "        $done = [math]::Floor($width * $pct / 100);" ^
+    "        $left = $width - $done;" ^
+    "        $bar = '[' + ('=' * $done) + (' ' * $left) + ']';" ^
+    "        Write-Host -NoNewline \"`r       $bar $pct%% ($rcv KB)\";" ^
+    "    };" ^
+    "    $wc.DownloadFileCompleted += { $global:done = $true };" ^
+    "    $global:done = $false;" ^
+    "    $wc.DownloadFileAsync([Uri]$url, $out);" ^
+    "    while (-not $global:done) { Start-Sleep -Milliseconds 50 };" ^
+    "    Write-Host '';" ^
+    "} catch { Write-Host \"Erreur: $($_.Exception.Message)\" }" 2>nul
 
 if exist "%TEMP%\Disable-Telemetry.cmd" (
     echo [OK] Script telecharge
     call "%TEMP%\Disable-Telemetry.cmd"
     del /f /q "%TEMP%\Disable-Telemetry.cmd" 2>nul
 ) else (
+    echo.
     echo [ERROR] Echec du telechargement du script
+    echo.
+    echo         CAUSES POSSIBLES:
+    echo         - GitHub est inaccessible
+    echo         - Pare-feu bloquant raw.githubusercontent.com
+    echo.
+    echo         SOLUTIONS:
+    echo         1. Verifiez votre connexion Internet
+    echo         2. Desactivez temporairement le pare-feu
+    echo.
     echo         URL: %TELEMETRY_SCRIPT_URL%
 )
 goto :eof

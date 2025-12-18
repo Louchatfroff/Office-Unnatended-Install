@@ -43,14 +43,23 @@ try {
 
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-    # Download with progress
+    # Download with dynamic progress bar
     $wc = New-Object Net.WebClient
-    $downloadComplete = $false
+    $global:downloadComplete = $false
 
     Register-ObjectEvent -InputObject $wc -EventName DownloadProgressChanged -Action {
         $percent = $EventArgs.ProgressPercentage
         $received = [math]::Round($EventArgs.BytesReceived / 1KB, 0)
-        Write-Host -NoNewline "`r       Progress: $percent% - $received KB"
+
+        # Dynamic width based on window size
+        $width = $Host.UI.RawUI.WindowSize.Width - 25
+        if ($width -lt 10) { $width = 10 }
+
+        $done = [math]::Floor($width * $percent / 100)
+        $left = $width - $done
+        $bar = '[' + ('=' * $done) + (' ' * $left) + ']'
+
+        Write-Host -NoNewline "`r       $bar $percent% ($received KB)"
     } | Out-Null
 
     Register-ObjectEvent -InputObject $wc -EventName DownloadFileCompleted -Action {
@@ -74,8 +83,32 @@ try {
         # Cleanup
         Remove-Item $scriptPath -Force -ErrorAction SilentlyContinue
     } else {
+        Write-Host ""
         Write-Host "[ERREUR] Echec du telechargement" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "         CAUSES POSSIBLES:" -ForegroundColor Yellow
+        Write-Host "         - Pas de connexion Internet"
+        Write-Host "         - GitHub est inaccessible ou bloque"
+        Write-Host "         - Pare-feu/Proxy bloquant la connexion"
+        Write-Host ""
+        Write-Host "         SOLUTIONS:" -ForegroundColor Yellow
+        Write-Host "         1. Verifiez votre connexion Internet"
+        Write-Host "         2. Essayez d'acceder a github.com"
+        Write-Host "         3. Desactivez temporairement le pare-feu"
+        Write-Host ""
     }
 } catch {
+    Write-Host ""
     Write-Host "[ERREUR] $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "         CAUSES POSSIBLES:" -ForegroundColor Yellow
+    Write-Host "         - Erreur reseau"
+    Write-Host "         - PowerShell bloque par la politique de securite"
+    Write-Host "         - Antivirus interferant"
+    Write-Host ""
+    Write-Host "         SOLUTIONS:" -ForegroundColor Yellow
+    Write-Host "         1. Reessayez la commande"
+    Write-Host "         2. Executez: Set-ExecutionPolicy Bypass -Scope Process"
+    Write-Host "         3. Desactivez temporairement l'antivirus"
+    Write-Host ""
 }
