@@ -88,31 +88,9 @@ echo [INFO] Downloading Office Deployment Tool...
 
 set "ODT_URL=https://officecdn.microsoft.com/pr/wsus/setup.exe"
 
-powershell -Command ^
-    "$ProgressPreference = 'SilentlyContinue';" ^
-    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
-    "$url = '%ODT_URL%';" ^
-    "$out = '%ODT_EXE%';" ^
-    "try {" ^
-    "    $wc = New-Object Net.WebClient;" ^
-    "    $wc.Headers.Add('User-Agent', 'Mozilla/5.0');" ^
-    "    $total = 0;" ^
-    "    $wc.DownloadProgressChanged += {" ^
-    "        $pct = $_.ProgressPercentage;" ^
-    "        $rcv = [math]::Round($_.BytesReceived/1MB, 2);" ^
-    "        $width = $Host.UI.RawUI.WindowSize.Width - 30;" ^
-    "        if ($width -lt 10) { $width = 10 };" ^
-    "        $done = [math]::Floor($width * $pct / 100);" ^
-    "        $left = $width - $done;" ^
-    "        $bar = '[' + ('=' * $done) + ('>' * [math]::Min(1, $left)) + (' ' * [math]::Max(0, $left - 1)) + ']';" ^
-    "        Write-Host -NoNewline \"`r       $bar $pct%% ($rcv MB)   \";" ^
-    "    };" ^
-    "    $wc.DownloadFileCompleted += { $global:done = $true };" ^
-    "    $global:done = $false;" ^
-    "    $wc.DownloadFileAsync([Uri]$url, $out);" ^
-    "    while (-not $global:done) { Start-Sleep -Milliseconds 50 };" ^
-    "    Write-Host '';" ^
-    "} catch { Write-Host \"Error: $($_.Exception.Message)\"; exit 1 }"
+rem Use Start-BitsTransfer when available (reliable on Windows), otherwise fallback to Invoke-WebRequest
+powershell -NoProfile -Command ^
+    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; try { if (Get-Command Start-BitsTransfer -ErrorAction SilentlyContinue) { Start-BitsTransfer -Source '%ODT_URL%' -Destination '%ODT_EXE%' -DisplayName 'ODT Download' } else { Invoke-WebRequest -Uri '%ODT_URL%' -OutFile '%ODT_EXE%' -UseBasicParsing } } catch { Write-Host \"Error: $($_.Exception.Message)\"; exit 1 }"
 
 if not exist "%ODT_EXE%" (
     echo.
@@ -367,9 +345,9 @@ pause
 exit /b 0
 
 :: ============================================================================
-:: FUNCTION: Download with progress bar
+:: FUNCTION: Download with progress bar (compat fallback)
+:: Uses Start-BitsTransfer if available, otherwise Invoke-WebRequest
 :: ============================================================================
-
 :download_with_progress
 set "DL_URL=%~1"
 set "DL_OUT=%~2"
@@ -377,28 +355,7 @@ set "DL_NAME=%~3"
 
 echo [INFO] Downloading %DL_NAME%...
 
-powershell -Command ^
-    "$ProgressPreference = 'SilentlyContinue';" ^
-    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
-    "$url = '%DL_URL%';" ^
-    "$out = '%DL_OUT%';" ^
-    "try {" ^
-    "    $wc = New-Object Net.WebClient;" ^
-    "    $wc.DownloadProgressChanged += {" ^
-    "        $pct = $_.ProgressPercentage;" ^
-    "        $rcv = [math]::Round($_.BytesReceived/1KB, 0);" ^
-    "        $width = $Host.UI.RawUI.WindowSize.Width - 25;" ^
-    "        if ($width -lt 10) { $width = 10 };" ^
-    "        $done = [math]::Floor($width * $pct / 100);" ^
-    "        $left = $width - $done;" ^
-    "        $bar = '[' + ('=' * $done) + (' ' * $left) + ']';" ^
-    "        Write-Host -NoNewline \"`r       $bar $pct%% ($rcv KB)\";" ^
-    "    };" ^
-    "    $wc.DownloadFileCompleted += { $global:done = $true };" ^
-    "    $global:done = $false;" ^
-    "    $wc.DownloadFileAsync([Uri]$url, $out);" ^
-    "    while (-not $global:done) { Start-Sleep -Milliseconds 50 };" ^
-    "    Write-Host '';" ^
-    "} catch { Write-Host \"Error: $($_.Exception.Message)\" }" 2>nul
+powershell -NoProfile -Command ^
+    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; try { if (Get-Command Start-BitsTransfer -ErrorAction SilentlyContinue) { Start-BitsTransfer -Source '%DL_URL%' -Destination '%DL_OUT%' -DisplayName '%DL_NAME%' } else { Invoke-WebRequest -Uri '%DL_URL%' -OutFile '%DL_OUT%' -UseBasicParsing } } catch { Write-Host \"Error: $($_.Exception.Message)\" }" 2>nul
 
 goto :eof
