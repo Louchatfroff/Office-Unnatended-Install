@@ -126,29 +126,14 @@ if not exist "%WORK_DIR%" mkdir "%WORK_DIR%"
 :: Download ODT
 echo [INFO] Downloading Office Deployment Tool...
 powershell -Command ^
-    "$ProgressPreference = 'SilentlyContinue';" ^
     "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
-    "$url = 'https://officecdn.microsoft.com/pr/wsus/setup.exe';" ^
-    "$out = '%ODT_EXE%';" ^
+    "$ProgressPreference = 'Continue';" ^
     "try {" ^
-    "    $wc = New-Object Net.WebClient;" ^
-    "    $wc.Headers.Add('User-Agent', 'Mozilla/5.0');" ^
-    "    $wc.DownloadProgressChanged += {" ^
-    "        $pct = $_.ProgressPercentage;" ^
-    "        $rcv = [math]::Round($_.BytesReceived/1MB, 2);" ^
-    "        $width = $Host.UI.RawUI.WindowSize.Width - 30;" ^
-    "        if ($width -lt 10) { $width = 10 };" ^
-    "        $done = [math]::Floor($width * $pct / 100);" ^
-    "        $left = $width - $done;" ^
-    "        $bar = '[' + ('=' * $done) + (' ' * $left) + ']';" ^
-    "        Write-Host -NoNewline \"`r       $bar $pct%% ($rcv MB)\";" ^
-    "    };" ^
-    "    $wc.DownloadFileCompleted += { $global:done = $true };" ^
-    "    $global:done = $false;" ^
-    "    $wc.DownloadFileAsync([Uri]$url, $out);" ^
-    "    while (-not $global:done) { Start-Sleep -Milliseconds 50 };" ^
-    "    Write-Host '';" ^
-    "} catch { Write-Host \"Error: $($_.Exception.Message)\"; exit 1 }"
+    "    Invoke-WebRequest -Uri 'https://officecdn.microsoft.com/pr/wsus/setup.exe' -OutFile '%ODT_EXE%' -UseBasicParsing;" ^
+    "} catch {" ^
+    "    Write-Host \"Error: $($_.Exception.Message)\";" ^
+    "    exit 1;" ^
+    "}"
 
 if not exist "%ODT_EXE%" (
     echo.
@@ -278,28 +263,13 @@ echo [INFO] Downloading Ohook script...
 set "OHOOK_SCRIPT_URL=https://raw.githubusercontent.com/Louchatfroff/Office-Unnatended-Install/main/Ohook-Activate.cmd"
 
 powershell -Command ^
-    "$ProgressPreference = 'SilentlyContinue';" ^
     "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
-    "$url = '%OHOOK_SCRIPT_URL%';" ^
-    "$out = '%TEMP%\Ohook-Activate.cmd';" ^
+    "$ProgressPreference = 'Continue';" ^
     "try {" ^
-    "    $wc = New-Object Net.WebClient;" ^
-    "    $wc.DownloadProgressChanged += {" ^
-    "        $pct = $_.ProgressPercentage;" ^
-    "        $rcv = [math]::Round($_.BytesReceived/1KB, 0);" ^
-    "        $width = $Host.UI.RawUI.WindowSize.Width - 25;" ^
-    "        if ($width -lt 10) { $width = 10 };" ^
-    "        $done = [math]::Floor($width * $pct / 100);" ^
-    "        $left = $width - $done;" ^
-    "        $bar = '[' + ('=' * $done) + (' ' * $left) + ']';" ^
-    "        Write-Host -NoNewline \"`r       $bar $pct%% ($rcv KB)\";" ^
-    "    };" ^
-    "    $wc.DownloadFileCompleted += { $global:done = $true };" ^
-    "    $global:done = $false;" ^
-    "    $wc.DownloadFileAsync([Uri]$url, $out);" ^
-    "    while (-not $global:done) { Start-Sleep -Milliseconds 50 };" ^
-    "    Write-Host '';" ^
-    "} catch { Write-Host \"Error: $($_.Exception.Message)\" }" 2>nul
+    "    Invoke-WebRequest -Uri '%OHOOK_SCRIPT_URL%' -OutFile '%TEMP%\Ohook-Activate.cmd' -UseBasicParsing;" ^
+    "} catch {" ^
+    "    Write-Host \"Error: $($_.Exception.Message)\";" ^
+    "}"
 
 if exist "%TEMP%\Ohook-Activate.cmd" (
     echo [OK] Script downloaded
@@ -348,28 +318,13 @@ echo [INFO] Downloading disable script...
 set "TELEMETRY_SCRIPT_URL=https://raw.githubusercontent.com/Louchatfroff/Office-Unnatended-Install/main/Disable-Telemetry.cmd"
 
 powershell -Command ^
-    "$ProgressPreference = 'SilentlyContinue';" ^
     "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
-    "$url = '%TELEMETRY_SCRIPT_URL%';" ^
-    "$out = '%TEMP%\Disable-Telemetry.cmd';" ^
+    "$ProgressPreference = 'Continue';" ^
     "try {" ^
-    "    $wc = New-Object Net.WebClient;" ^
-    "    $wc.DownloadProgressChanged += {" ^
-    "        $pct = $_.ProgressPercentage;" ^
-    "        $rcv = [math]::Round($_.BytesReceived/1KB, 0);" ^
-    "        $width = $Host.UI.RawUI.WindowSize.Width - 25;" ^
-    "        if ($width -lt 10) { $width = 10 };" ^
-    "        $done = [math]::Floor($width * $pct / 100);" ^
-    "        $left = $width - $done;" ^
-    "        $bar = '[' + ('=' * $done) + (' ' * $left) + ']';" ^
-    "        Write-Host -NoNewline \"`r       $bar $pct%% ($rcv KB)\";" ^
-    "    };" ^
-    "    $wc.DownloadFileCompleted += { $global:done = $true };" ^
-    "    $global:done = $false;" ^
-    "    $wc.DownloadFileAsync([Uri]$url, $out);" ^
-    "    while (-not $global:done) { Start-Sleep -Milliseconds 50 };" ^
-    "    Write-Host '';" ^
-    "} catch { Write-Host \"Error: $($_.Exception.Message)\" }" 2>nul
+    "    Invoke-WebRequest -Uri '%TELEMETRY_SCRIPT_URL%' -OutFile '%TEMP%\Disable-Telemetry.cmd' -UseBasicParsing;" ^
+    "} catch {" ^
+    "    Write-Host \"Error: $($_.Exception.Message)\";" ^
+    "}"
 
 if exist "%TEMP%\Disable-Telemetry.cmd" (
     echo [OK] Script downloaded

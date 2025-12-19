@@ -42,36 +42,10 @@ try {
     $url = "$BaseURL/Office-Install-Activate.cmd"
 
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    $ProgressPreference = 'Continue'
 
-    # Download with dynamic progress bar
-    $wc = New-Object Net.WebClient
-    $global:downloadComplete = $false
-
-    Register-ObjectEvent -InputObject $wc -EventName DownloadProgressChanged -Action {
-        $percent = $EventArgs.ProgressPercentage
-        $received = [math]::Round($EventArgs.BytesReceived / 1KB, 0)
-
-        # Dynamic width based on window size
-        $width = $Host.UI.RawUI.WindowSize.Width - 25
-        if ($width -lt 10) { $width = 10 }
-
-        $done = [math]::Floor($width * $percent / 100)
-        $left = $width - $done
-        $bar = '[' + ('=' * $done) + (' ' * $left) + ']'
-
-        Write-Host -NoNewline "`r       $bar $percent% ($received KB)"
-    } | Out-Null
-
-    Register-ObjectEvent -InputObject $wc -EventName DownloadFileCompleted -Action {
-        $global:downloadComplete = $true
-    } | Out-Null
-
-    $wc.DownloadFileAsync([Uri]$url, $scriptPath)
-
-    while (-not $global:downloadComplete) {
-        Start-Sleep -Milliseconds 100
-    }
-    Write-Host ""
+    # Download with Invoke-WebRequest (reliable with built-in progress)
+    Invoke-WebRequest -Uri $url -OutFile $scriptPath -UseBasicParsing
 
     if (Test-Path $scriptPath) {
         Write-Host "[OK] Script downloaded" -ForegroundColor Green

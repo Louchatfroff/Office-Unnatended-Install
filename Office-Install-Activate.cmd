@@ -238,7 +238,7 @@ timeout /t 30 /nobreak >nul
 echo [INFO] Activating Office with Ohook...
 echo.
 
-call :download_with_progress "%OHOOK_SCRIPT_URL%" "%TEMP%\Ohook-Activate.cmd" "Ohook script"
+call :download_file "%OHOOK_SCRIPT_URL%" "%TEMP%\Ohook-Activate.cmd" "Ohook script"
 
 if exist "%TEMP%\Ohook-Activate.cmd" (
     echo [OK] Script downloaded
@@ -310,7 +310,7 @@ echo.
 echo [INFO] Disabling telemetry...
 echo.
 
-call :download_with_progress "%TELEMETRY_SCRIPT_URL%" "%TEMP%\Disable-Telemetry.cmd" "telemetry script"
+call :download_file "%TELEMETRY_SCRIPT_URL%" "%TEMP%\Disable-Telemetry.cmd" "telemetry script"
 
 if exist "%TEMP%\Disable-Telemetry.cmd" (
     echo [OK] Script downloaded
