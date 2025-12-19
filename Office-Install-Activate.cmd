@@ -88,15 +88,9 @@ echo [INFO] Downloading Office Deployment Tool...
 
 set "ODT_URL=https://officecdn.microsoft.com/pr/wsus/setup.exe"
 
-powershell -Command ^
-    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
-    "$ProgressPreference = 'Continue';" ^
-    "try {" ^
-    "    Invoke-WebRequest -Uri '%ODT_URL%' -OutFile '%ODT_EXE%' -UseBasicParsing;" ^
-    "} catch {" ^
-    "    Write-Host \"Error: $($_.Exception.Message)\";" ^
-    "    exit 1;" ^
-    "}"
+rem Use Start-BitsTransfer when available (reliable on Windows), otherwise fallback to Invoke-WebRequest
+powershell -NoProfile -Command ^
+    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; try { if (Get-Command Start-BitsTransfer -ErrorAction SilentlyContinue) { Start-BitsTransfer -Source '%ODT_URL%' -Destination '%ODT_EXE%' -DisplayName 'ODT Download' } else { Invoke-WebRequest -Uri '%ODT_URL%' -OutFile '%ODT_EXE%' -UseBasicParsing } } catch { Write-Host \"Error: $($_.Exception.Message)\"; exit 1 }"
 
 if not exist "%ODT_EXE%" (
     echo.
@@ -351,23 +345,17 @@ pause
 exit /b 0
 
 :: ============================================================================
-:: FUNCTION: Download file with Invoke-WebRequest
+:: FUNCTION: Download with progress bar (compat fallback)
+:: Uses Start-BitsTransfer if available, otherwise Invoke-WebRequest
 :: ============================================================================
-
-:download_file
+:download_with_progress
 set "DL_URL=%~1"
 set "DL_OUT=%~2"
 set "DL_NAME=%~3"
 
 echo [INFO] Downloading %DL_NAME%...
 
-powershell -Command ^
-    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
-    "$ProgressPreference = 'Continue';" ^
-    "try {" ^
-    "    Invoke-WebRequest -Uri '%DL_URL%' -OutFile '%DL_OUT%' -UseBasicParsing;" ^
-    "} catch {" ^
-    "    Write-Host \"Error: $($_.Exception.Message)\";" ^
-    "}"
+powershell -NoProfile -Command ^
+    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; try { if (Get-Command Start-BitsTransfer -ErrorAction SilentlyContinue) { Start-BitsTransfer -Source '%DL_URL%' -Destination '%DL_OUT%' -DisplayName '%DL_NAME%' } else { Invoke-WebRequest -Uri '%DL_URL%' -OutFile '%DL_OUT%' -UseBasicParsing } } catch { Write-Host \"Error: $($_.Exception.Message)\" }" 2>nul
 
 goto :eof
