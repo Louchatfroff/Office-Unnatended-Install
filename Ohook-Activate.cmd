@@ -138,28 +138,14 @@ if not exist "%TEMP_DIR%" mkdir "%TEMP_DIR%"
 :: Download 64-bit DLL
 echo [INFO] Downloading sppc64.dll...
 powershell -Command ^
-    "$ProgressPreference = 'SilentlyContinue';" ^
     "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
-    "$url = '%DLL64_URL%';" ^
-    "$out = '%DLL64_PATH%';" ^
+    "$ProgressPreference = 'Continue';" ^
     "try {" ^
-    "    $wc = New-Object Net.WebClient;" ^
-    "    $wc.DownloadProgressChanged += {" ^
-    "        $pct = $_.ProgressPercentage;" ^
-    "        $rcv = [math]::Round($_.BytesReceived/1KB, 0);" ^
-    "        $width = $Host.UI.RawUI.WindowSize.Width - 25;" ^
-    "        if ($width -lt 10) { $width = 10 };" ^
-    "        $done = [math]::Floor($width * $pct / 100);" ^
-    "        $left = $width - $done;" ^
-    "        $bar = '[' + ('=' * $done) + (' ' * $left) + ']';" ^
-    "        Write-Host -NoNewline \"`r       $bar $pct%% ($rcv KB)\";" ^
-    "    };" ^
-    "    $wc.DownloadFileCompleted += { $global:done = $true };" ^
-    "    $global:done = $false;" ^
-    "    $wc.DownloadFileAsync([Uri]$url, $out);" ^
-    "    while (-not $global:done) { Start-Sleep -Milliseconds 50 };" ^
-    "    Write-Host '';" ^
-    "} catch { Write-Host \"Error: $($_.Exception.Message)\"; exit 1 }"
+    "    Invoke-WebRequest -Uri '%DLL64_URL%' -OutFile '%DLL64_PATH%' -UseBasicParsing;" ^
+    "} catch {" ^
+    "    Write-Host \"Error: $($_.Exception.Message)\";" ^
+    "    exit 1;" ^
+    "}"
 
 if not exist "%DLL64_PATH%" (
     echo.
@@ -187,28 +173,14 @@ echo [OK] sppc64.dll downloaded
 :: Download 32-bit DLL
 echo [INFO] Downloading sppc32.dll...
 powershell -Command ^
-    "$ProgressPreference = 'SilentlyContinue';" ^
     "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
-    "$url = '%DLL32_URL%';" ^
-    "$out = '%DLL32_PATH%';" ^
+    "$ProgressPreference = 'Continue';" ^
     "try {" ^
-    "    $wc = New-Object Net.WebClient;" ^
-    "    $wc.DownloadProgressChanged += {" ^
-    "        $pct = $_.ProgressPercentage;" ^
-    "        $rcv = [math]::Round($_.BytesReceived/1KB, 0);" ^
-    "        $width = $Host.UI.RawUI.WindowSize.Width - 25;" ^
-    "        if ($width -lt 10) { $width = 10 };" ^
-    "        $done = [math]::Floor($width * $pct / 100);" ^
-    "        $left = $width - $done;" ^
-    "        $bar = '[' + ('=' * $done) + (' ' * $left) + ']';" ^
-    "        Write-Host -NoNewline \"`r       $bar $pct%% ($rcv KB)\";" ^
-    "    };" ^
-    "    $wc.DownloadFileCompleted += { $global:done = $true };" ^
-    "    $global:done = $false;" ^
-    "    $wc.DownloadFileAsync([Uri]$url, $out);" ^
-    "    while (-not $global:done) { Start-Sleep -Milliseconds 50 };" ^
-    "    Write-Host '';" ^
-    "} catch { Write-Host \"Error: $($_.Exception.Message)\"; exit 1 }"
+    "    Invoke-WebRequest -Uri '%DLL32_URL%' -OutFile '%DLL32_PATH%' -UseBasicParsing;" ^
+    "} catch {" ^
+    "    Write-Host \"Error: $($_.Exception.Message)\";" ^
+    "    exit 1;" ^
+    "}"
 
 if not exist "%DLL32_PATH%" (
     echo.

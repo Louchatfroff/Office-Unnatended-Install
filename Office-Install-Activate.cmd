@@ -89,30 +89,14 @@ echo [INFO] Downloading Office Deployment Tool...
 set "ODT_URL=https://officecdn.microsoft.com/pr/wsus/setup.exe"
 
 powershell -Command ^
-    "$ProgressPreference = 'SilentlyContinue';" ^
     "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
-    "$url = '%ODT_URL%';" ^
-    "$out = '%ODT_EXE%';" ^
+    "$ProgressPreference = 'Continue';" ^
     "try {" ^
-    "    $wc = New-Object Net.WebClient;" ^
-    "    $wc.Headers.Add('User-Agent', 'Mozilla/5.0');" ^
-    "    $total = 0;" ^
-    "    $wc.DownloadProgressChanged += {" ^
-    "        $pct = $_.ProgressPercentage;" ^
-    "        $rcv = [math]::Round($_.BytesReceived/1MB, 2);" ^
-    "        $width = $Host.UI.RawUI.WindowSize.Width - 30;" ^
-    "        if ($width -lt 10) { $width = 10 };" ^
-    "        $done = [math]::Floor($width * $pct / 100);" ^
-    "        $left = $width - $done;" ^
-    "        $bar = '[' + ('=' * $done) + ('>' * [math]::Min(1, $left)) + (' ' * [math]::Max(0, $left - 1)) + ']';" ^
-    "        Write-Host -NoNewline \"`r       $bar $pct%% ($rcv MB)   \";" ^
-    "    };" ^
-    "    $wc.DownloadFileCompleted += { $global:done = $true };" ^
-    "    $global:done = $false;" ^
-    "    $wc.DownloadFileAsync([Uri]$url, $out);" ^
-    "    while (-not $global:done) { Start-Sleep -Milliseconds 50 };" ^
-    "    Write-Host '';" ^
-    "} catch { Write-Host \"Error: $($_.Exception.Message)\"; exit 1 }"
+    "    Invoke-WebRequest -Uri '%ODT_URL%' -OutFile '%ODT_EXE%' -UseBasicParsing;" ^
+    "} catch {" ^
+    "    Write-Host \"Error: $($_.Exception.Message)\";" ^
+    "    exit 1;" ^
+    "}"
 
 if not exist "%ODT_EXE%" (
     echo.
@@ -260,7 +244,7 @@ timeout /t 30 /nobreak >nul
 echo [INFO] Activating Office with Ohook...
 echo.
 
-call :download_with_progress "%OHOOK_SCRIPT_URL%" "%TEMP%\Ohook-Activate.cmd" "Ohook script"
+call :download_file "%OHOOK_SCRIPT_URL%" "%TEMP%\Ohook-Activate.cmd" "Ohook script"
 
 if exist "%TEMP%\Ohook-Activate.cmd" (
     echo [OK] Script downloaded
@@ -332,7 +316,7 @@ echo.
 echo [INFO] Disabling telemetry...
 echo.
 
-call :download_with_progress "%TELEMETRY_SCRIPT_URL%" "%TEMP%\Disable-Telemetry.cmd" "telemetry script"
+call :download_file "%TELEMETRY_SCRIPT_URL%" "%TEMP%\Disable-Telemetry.cmd" "telemetry script"
 
 if exist "%TEMP%\Disable-Telemetry.cmd" (
     echo [OK] Script downloaded
@@ -367,10 +351,10 @@ pause
 exit /b 0
 
 :: ============================================================================
-:: FUNCTION: Download with progress bar
+:: FUNCTION: Download file with Invoke-WebRequest
 :: ============================================================================
 
-:download_with_progress
+:download_file
 set "DL_URL=%~1"
 set "DL_OUT=%~2"
 set "DL_NAME=%~3"
@@ -378,27 +362,12 @@ set "DL_NAME=%~3"
 echo [INFO] Downloading %DL_NAME%...
 
 powershell -Command ^
-    "$ProgressPreference = 'SilentlyContinue';" ^
     "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
-    "$url = '%DL_URL%';" ^
-    "$out = '%DL_OUT%';" ^
+    "$ProgressPreference = 'Continue';" ^
     "try {" ^
-    "    $wc = New-Object Net.WebClient;" ^
-    "    $wc.DownloadProgressChanged += {" ^
-    "        $pct = $_.ProgressPercentage;" ^
-    "        $rcv = [math]::Round($_.BytesReceived/1KB, 0);" ^
-    "        $width = $Host.UI.RawUI.WindowSize.Width - 25;" ^
-    "        if ($width -lt 10) { $width = 10 };" ^
-    "        $done = [math]::Floor($width * $pct / 100);" ^
-    "        $left = $width - $done;" ^
-    "        $bar = '[' + ('=' * $done) + (' ' * $left) + ']';" ^
-    "        Write-Host -NoNewline \"`r       $bar $pct%% ($rcv KB)\";" ^
-    "    };" ^
-    "    $wc.DownloadFileCompleted += { $global:done = $true };" ^
-    "    $global:done = $false;" ^
-    "    $wc.DownloadFileAsync([Uri]$url, $out);" ^
-    "    while (-not $global:done) { Start-Sleep -Milliseconds 50 };" ^
-    "    Write-Host '';" ^
-    "} catch { Write-Host \"Error: $($_.Exception.Message)\" }" 2>nul
+    "    Invoke-WebRequest -Uri '%DL_URL%' -OutFile '%DL_OUT%' -UseBasicParsing;" ^
+    "} catch {" ^
+    "    Write-Host \"Error: $($_.Exception.Message)\";" ^
+    "}"
 
 goto :eof
