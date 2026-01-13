@@ -66,15 +66,6 @@ The `Disable-Telemetry.cmd` script disables:
 - Copilot
 - Teams chat in taskbar
 
-### URLs to Configure
-
-In the installation scripts, configure these variables:
-
-```batch
-set "OHOOK_SCRIPT_URL=https://raw.githubusercontent.com/YOUR_USER/YOUR_REPO/main/Ohook-Activate.cmd"
-set "TELEMETRY_SCRIPT_URL=https://raw.githubusercontent.com/YOUR_USER/YOUR_REPO/main/Disable-Telemetry.cmd"
-```
-
 ## How Ohook Works
 
 Ohook works by placing a custom `sppc.dll` file in the Office folder. This file intercepts activation verification calls and always returns that Office is activated.
