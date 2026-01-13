@@ -3,7 +3,6 @@
 setlocal EnableDelayedExpansion
 title Office Installation Menu
 
-:: Check admin
 net session >nul 2>&1
 if %errorlevel% neq 0 (
     echo [ERROR] Please run this script as Administrator.
@@ -47,9 +46,6 @@ echo  [ERROR] Invalid choice
 timeout /t 2 >nul
 goto menu
 
-:: ============================================================================
-:: OFFICE 365 INSTALLATION
-:: ============================================================================
 :install_365
 cls
 echo.
