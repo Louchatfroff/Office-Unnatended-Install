@@ -1,35 +1,16 @@
 @echo off
-:: ============================================================================
-:: Ohook Office Activation Script - Standalone Version
-:: Based on ohook by asdcorp - https://github.com/asdcorp/ohook
-:: ============================================================================
-:: This script activates Microsoft Office using the Ohook method
-:: It places a custom sppc.dll file in the Office folder
-:: ============================================================================
-
 setlocal EnableDelayedExpansion
 title Ohook Office Activation
-
-:: ============================================================================
-:: CONFIGURATION - DLL URLs (modify if needed)
-:: ============================================================================
 set "OHOOK_VERSION=0.5"
 set "OHOOK_URL_BASE=https://github.com/asdcorp/ohook/releases/download/%OHOOK_VERSION%"
 set "DLL32_URL=%OHOOK_URL_BASE%/sppc32.dll"
 set "DLL64_URL=%OHOOK_URL_BASE%/sppc64.dll"
-
-:: SHA256 checksums for verification
 set "DLL32_HASH=09865ea5993215965e8f27a74b8a41d15fd0f60f5f404cb7a8b3c7757acdab02"
 set "DLL64_HASH=393a1fa26deb3663854e41f2b687c188a9eacd87b23f17ea09422c4715cb5a9f"
-
-:: Temp directory
 set "TEMP_DIR=%TEMP%\ohook_temp"
 set "DLL32_PATH=%TEMP_DIR%\sppc32.dll"
 set "DLL64_PATH=%TEMP_DIR%\sppc64.dll"
 
-:: ============================================================================
-:: ADMIN CHECK
-:: ============================================================================
 :check_admin
 echo.
 echo ============================================
@@ -55,9 +36,6 @@ if %errorlevel% neq 0 (
 echo [OK] Administrator privileges confirmed
 echo.
 
-:: ============================================================================
-:: OFFICE DETECTION
-:: ============================================================================
 :detect_office
 echo [INFO] Detecting Office installations...
 echo.
@@ -65,7 +43,6 @@ echo.
 set "OFFICE_FOUND=0"
 set "OFFICE_PATHS="
 
-:: Office Click-to-Run paths
 for %%a in (
     "%ProgramFiles%\Microsoft Office\root\Office16"
     "%ProgramFiles(x86)%\Microsoft Office\root\Office16"
@@ -79,7 +56,6 @@ for %%a in (
     )
 )
 
-:: Office MSI paths
 for %%a in (
     "%ProgramFiles%\Microsoft Office\Office16"
     "%ProgramFiles(x86)%\Microsoft Office\Office16"
@@ -93,7 +69,6 @@ for %%a in (
     )
 )
 
-:: Check registry for additional paths
 for /f "tokens=2*" %%a in ('reg query "HKLM\SOFTWARE\Microsoft\Office\ClickToRun\Configuration" /v InstallationPath 2^>nul') do (
     set "C2R_PATH=%%b"
     if defined C2R_PATH (
@@ -126,16 +101,12 @@ if "%OFFICE_FOUND%"=="0" (
     exit /b 1
 )
 
-:: ============================================================================
-:: DOWNLOAD DLLs
-:: ============================================================================
 :download_dlls
 echo [INFO] Downloading Ohook files...
 echo.
 
 if not exist "%TEMP_DIR%" mkdir "%TEMP_DIR%"
 
-:: Download 64-bit DLL
 echo [INFO] Downloading sppc64.dll...
 powershell -Command ^
     "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
@@ -170,7 +141,6 @@ if not exist "%DLL64_PATH%" (
 )
 echo [OK] sppc64.dll downloaded
 
-:: Download 32-bit DLL
 echo [INFO] Downloading sppc32.dll...
 powershell -Command ^
     "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
@@ -206,9 +176,6 @@ if not exist "%DLL32_PATH%" (
 echo [OK] sppc32.dll downloaded
 echo.
 
-:: ============================================================================
-:: HASH VERIFICATION (optional but recommended)
-:: ============================================================================
 :verify_hash
 echo [INFO] Verifying file integrity...
 
@@ -237,14 +204,10 @@ if /i "%COMPUTED_HASH%"=="%DLL32_HASH%" (
 )
 echo.
 
-:: ============================================================================
-:: DLL INSTALLATION
-:: ============================================================================
 :install_dlls
 echo [INFO] Installing Ohook files...
 echo.
 
-:: Process each Office path
 for %%p in (%OFFICE_PATHS%) do (
     set "CURRENT_PATH=%%~p"
     if not "!CURRENT_PATH!"=="" (
@@ -278,14 +241,10 @@ for %%p in (%OFFICE_PATHS%) do (
     )
 )
 
-:: ============================================================================
-:: LICENSE INSTALLATION
-:: ============================================================================
 :install_licenses
 echo [INFO] Installing Office licenses...
 echo.
 
-:: Find Office C2R license path
 set "LICENSE_PATH="
 for /f "tokens=2*" %%a in ('reg query "HKLM\SOFTWARE\Microsoft\Office\ClickToRun\Configuration" /v InstallationPath 2^>nul') do (
     set "LICENSE_PATH=%%b\root\Licenses16"
@@ -324,9 +283,6 @@ if defined LICENSE_PATH (
 )
 echo.
 
-:: ============================================================================
-:: ACTIVATION
-:: ============================================================================
 :activate
 echo [INFO] Activating Office...
 echo.
@@ -351,9 +307,8 @@ for %%p in (
     )
 )
 
-:: ============================================================================
-:: VERIFICATION
-:: ============================================================================
+
+
 :verify
 echo.
 echo [INFO] Verifying activation status...
@@ -371,10 +326,6 @@ for %%p in (
         goto :cleanup
     )
 )
-
-:: ============================================================================
-:: CLEANUP
-:: ============================================================================
 :cleanup
 echo.
 echo ============================================
@@ -383,10 +334,6 @@ echo [INFO] Cleaning up temporary files...
 rd /s /q "%TEMP_DIR%" 2>nul
 echo [OK] Cleanup complete
 echo.
-
-:: ============================================================================
-:: END
-:: ============================================================================
 :end
 echo ============================================
 echo   Ohook Activation Complete!
