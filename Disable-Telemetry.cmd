@@ -1,15 +1,8 @@
 @echo off
-:: ============================================================================
-:: Disable Telemetry and Recommendations Script
-:: Disables Windows, Office, Edge telemetry and UI recommendations
-:: ============================================================================
 
 setlocal EnableDelayedExpansion
 title Disable Telemetry and Recommendations
 
-:: ============================================================================
-:: CHECK ADMIN
-:: ============================================================================
 net session >nul 2>&1
 if %errorlevel% neq 0 (
     echo [ERROR] This script requires Administrator privileges.
@@ -23,9 +16,6 @@ echo   Disable Telemetry and Recommendations
 echo ============================================
 echo.
 
-:: ============================================================================
-:: WINDOWS TELEMETRY
-:: ============================================================================
 echo [INFO] Disabling Windows telemetry...
 
 :: Disable Telemetry
@@ -73,9 +63,6 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "UploadUserActiviti
 echo [OK] Windows telemetry disabled
 echo.
 
-:: ============================================================================
-:: OFFICE TELEMETRY
-:: ============================================================================
 echo [INFO] Disabling Office telemetry...
 
 :: Office 16 (2016, 2019, 2021, 365)
@@ -108,9 +95,6 @@ reg add "HKCU\SOFTWARE\Microsoft\Office\16.0\Common\LinkedIn" /v "OfficeLinkedIn
 echo [OK] Office telemetry disabled
 echo.
 
-:: ============================================================================
-:: EDGE TELEMETRY
-:: ============================================================================
 echo [INFO] Disabling Edge telemetry...
 
 :: Disable Edge telemetry
@@ -140,9 +124,6 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Edge" /v "HideFirstRunExperience" /t R
 echo [OK] Edge telemetry disabled
 echo.
 
-:: ============================================================================
-:: DISABLE WIDGETS
-:: ============================================================================
 echo [INFO] Disabling Widgets...
 
 :: Disable Widgets
@@ -155,9 +136,6 @@ reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Feeds" /v "ShellFeedsTas
 echo [OK] Widgets disabled
 echo.
 
-:: ============================================================================
-:: DISABLE EXPLORER RECOMMENDATIONS
-:: ============================================================================
 echo [INFO] Disabling Explorer recommendations...
 
 :: Disable "Show sync provider notifications"
@@ -174,9 +152,6 @@ reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" 
 echo [OK] Explorer recommendations disabled
 echo.
 
-:: ============================================================================
-:: DISABLE START MENU RECOMMENDATIONS
-:: ============================================================================
 echo [INFO] Disabling Start Menu recommendations...
 
 :: Disable Start Menu suggestions
@@ -214,9 +189,6 @@ reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /
 echo [OK] Start Menu recommendations disabled
 echo.
 
-:: ============================================================================
-:: DISABLE TASKBAR RECOMMENDATIONS
-:: ============================================================================
 echo [INFO] Disabling Taskbar recommendations...
 
 :: Disable Search highlights
@@ -244,9 +216,6 @@ reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v "BingSearchEn
 echo [OK] Taskbar recommendations disabled
 echo.
 
-:: ============================================================================
-:: DISABLE OTHER ANNOYANCES
-:: ============================================================================
 echo [INFO] Disabling other elements...
 
 :: Disable "Finish setting up your device"
@@ -268,18 +237,12 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "EnableActivityFeed
 echo [OK] Other elements disabled
 echo.
 
-:: ============================================================================
-:: RESTART EXPLORER
-:: ============================================================================
 echo [INFO] Restarting Windows Explorer...
 taskkill /f /im explorer.exe >nul 2>&1
 start explorer.exe
 echo [OK] Explorer restarted
 echo.
 
-:: ============================================================================
-:: FINISH
-:: ============================================================================
 echo ============================================
 echo   Complete!
 echo ============================================
