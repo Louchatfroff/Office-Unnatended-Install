@@ -1,8 +1,4 @@
 @echo off
-:: ============================================================================
-:: Office Installation Menu - Interactive Version
-:: Based on Microsoft Activation Scripts (MAS) - https://massgrave.dev
-:: ============================================================================
 
 setlocal EnableDelayedExpansion
 title Office Installation Menu
@@ -79,9 +75,6 @@ set "CHANNEL=PerpetualVL2021"
 set "PIDKEY=FXYTK-NJJ8C-GB6DW-3DYQT-6F7TH"
 goto do_install
 
-:: ============================================================================
-:: OFFICE 2019 INSTALLATION
-:: ============================================================================
 :install_2019
 cls
 echo.
@@ -93,9 +86,6 @@ set "CHANNEL=PerpetualVL2019"
 set "PIDKEY=NMMKJ-6RK4F-KMJVX-8D9MJ-6MWKP"
 goto do_install
 
-:: ============================================================================
-:: CUSTOM INSTALLATION
-:: ============================================================================
 :install_custom
 cls
 echo.
@@ -112,18 +102,12 @@ if not exist "%CONFIG_PATH%" (
 set "USE_CUSTOM=1"
 goto do_install
 
-:: ============================================================================
-:: COMMON INSTALLATION LOGIC
-:: ============================================================================
-:do_install
 set "WORK_DIR=%TEMP%\OfficeInstall_%RANDOM%"
 set "ODT_EXE=%WORK_DIR%\setup.exe"
 set "CONFIG_FILE=%WORK_DIR%\config.xml"
 
-:: Create temp directory
 if not exist "%WORK_DIR%" mkdir "%WORK_DIR%"
 
-:: Download ODT
 echo [INFO] Downloading Office Deployment Tool...
 powershell -Command ^
     "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
@@ -155,14 +139,12 @@ if not exist "%ODT_EXE%" (
 echo [OK] ODT downloaded
 echo.
 
-:: Create or use config
 if defined USE_CUSTOM (
     copy "%CONFIG_PATH%" "%CONFIG_FILE%" >nul
 ) else (
     call :create_config
 )
 
-:: Download Office
 echo [INFO] Downloading Office files...
 echo        This may take several minutes...
 echo.
@@ -172,7 +154,6 @@ echo.
 echo [OK] Download complete
 echo.
 
-:: Install Office
 echo [INFO] Installing Microsoft Office...
 echo        Please wait 5-15 minutes...
 echo.
@@ -181,22 +162,18 @@ echo.
 echo [OK] Installation complete
 echo.
 
-:: Wait
 timeout /t 20 /nobreak >nul
 
-:: Activate
 call :run_ohook
 echo.
 echo [OK] Activation complete
 echo.
 
-:: Disable telemetry
 call :run_telemetry_disable
 echo.
 echo [OK] Telemetry disabled
 echo.
 
-:: Cleanup temp directory
 echo [INFO] Cleaning up temporary files...
 rd /s /q "%WORK_DIR%" 2>nul
 echo [OK] Cleanup complete
@@ -204,9 +181,6 @@ echo.
 
 pause
 goto menu
-
-:: ============================================================================
-:: CREATE CONFIG FILE
 :: ============================================================================
 :create_config
 echo [INFO] Creating configuration file...
@@ -237,9 +211,7 @@ echo ^</Configuration^>
 echo [OK] Configuration created
 goto :eof
 
-:: ============================================================================
-:: ACTIVATE ONLY
-:: ============================================================================
+
 :activate_only
 cls
 echo.
@@ -254,9 +226,7 @@ echo.
 pause
 goto menu
 
-:: ============================================================================
-:: RUN OHOOK FROM WEB
-:: ============================================================================
+
 :run_ohook
 echo [INFO] Downloading Ohook script...
 
@@ -292,9 +262,7 @@ if exist "%TEMP%\Ohook-Activate.cmd" (
 )
 goto :eof
 
-:: ============================================================================
-:: DISABLE TELEMETRY (menu option)
-:: ============================================================================
+
 :disable_telemetry
 cls
 echo.
@@ -309,9 +277,6 @@ echo.
 pause
 goto menu
 
-:: ============================================================================
-:: RUN TELEMETRY DISABLE FROM WEB
-:: ============================================================================
 :run_telemetry_disable
 echo [INFO] Downloading disable script...
 
@@ -346,9 +311,6 @@ if exist "%TEMP%\Disable-Telemetry.cmd" (
 )
 goto :eof
 
-:: ============================================================================
-:: CHECK STATUS
-:: ============================================================================
 :check_status
 cls
 echo.
@@ -377,9 +339,6 @@ echo.
 pause
 goto menu
 
-:: ============================================================================
-:: END
-:: ============================================================================
 :end
 echo.
 echo  Goodbye!
