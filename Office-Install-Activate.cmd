@@ -1,15 +1,9 @@
 @echo off
-:: ============================================================================
-:: Office Unattended Installation and Activation Script
-:: Based on Microsoft Activation Scripts (MAS) - https://massgrave.dev
-:: ============================================================================
 
 setlocal EnableDelayedExpansion
 title Office Unattended Install and Activate
 
-:: ============================================================================
-:: CONFIGURATION
-:: ============================================================================
+
 
 set "OFFICE_PRODUCT=O365ProPlusRetail"
 set "OFFICE_ARCH=64"
@@ -24,9 +18,6 @@ set "CONFIG_FILE=%WORK_DIR%\config.xml"
 set "OHOOK_SCRIPT_URL=https://raw.githubusercontent.com/Louchatfroff/Office-Unnatended-Install/main/Ohook-Activate.cmd"
 set "TELEMETRY_SCRIPT_URL=https://raw.githubusercontent.com/Louchatfroff/Office-Unnatended-Install/main/Disable-Telemetry.cmd"
 
-:: ============================================================================
-:: CHECK ADMIN PRIVILEGES
-:: ============================================================================
 
 :check_admin
 echo.
@@ -53,9 +44,6 @@ if %errorlevel% neq 0 (
 echo [OK] Administrator privileges confirmed
 echo.
 
-:: ============================================================================
-:: CREATE TEMP DIRECTORY
-:: ============================================================================
 
 :create_dirs
 echo [INFO] Creating temp directory...
@@ -79,9 +67,6 @@ if not exist "%WORK_DIR%" (
 echo [OK] Directory: %WORK_DIR%
 echo.
 
-:: ============================================================================
-:: DOWNLOAD OFFICE DEPLOYMENT TOOL
-:: ============================================================================
 
 :download_odt
 echo [INFO] Downloading Office Deployment Tool...
@@ -117,9 +102,7 @@ if not exist "%ODT_EXE%" (
 echo [OK] Office Deployment Tool downloaded
 echo.
 
-:: ============================================================================
-:: CREATE CONFIGURATION FILE
-:: ============================================================================
+
 
 :create_config
 echo [INFO] Creating configuration file...
@@ -157,11 +140,6 @@ if not exist "%CONFIG_FILE%" (
 
 echo [OK] Configuration created
 echo.
-
-:: ============================================================================
-:: DOWNLOAD OFFICE FILES
-:: ============================================================================
-
 :download_office
 echo [INFO] Downloading Office files...
 echo        This may take 5-30 minutes depending on your connection.
@@ -187,10 +165,6 @@ if %errorlevel% neq 0 (
 
 echo [OK] Office download complete
 echo.
-
-:: ============================================================================
-:: INSTALL OFFICE
-:: ============================================================================
 
 :install_office
 echo [INFO] Installing Microsoft Office...
@@ -230,9 +204,6 @@ echo.
 echo [INFO] Finalizing installation...
 timeout /t 30 /nobreak >nul
 
-:: ============================================================================
-:: ACTIVATE OFFICE USING OHOOK
-:: ============================================================================
 
 :activate_office
 echo [INFO] Activating Office with Ohook...
@@ -263,10 +234,6 @@ echo.
 echo [OK] Activation process complete
 echo.
 
-:: ============================================================================
-:: VERIFY ACTIVATION
-:: ============================================================================
-
 :verify_activation
 echo [INFO] Verifying activation status...
 echo.
@@ -292,19 +259,12 @@ if "%OSPP_FOUND%"=="0" (
 )
 echo.
 
-:: ============================================================================
-:: CLEANUP
-:: ============================================================================
-
 :cleanup
 echo [INFO] Cleaning up temporary files...
 rd /s /q "%WORK_DIR%" 2>nul
 echo [OK] Cleanup complete
 echo.
 
-:: ============================================================================
-:: DISABLE TELEMETRY
-:: ============================================================================
 
 :disable_telemetry
 echo [INFO] Disabling telemetry...
@@ -324,9 +284,6 @@ if exist "%TEMP%\Disable-Telemetry.cmd" (
 
 echo.
 
-:: ============================================================================
-:: FINISH
-:: ============================================================================
 
 :finish
 echo ============================================
@@ -344,10 +301,6 @@ echo.
 pause
 exit /b 0
 
-:: ============================================================================
-:: FUNCTION: Download with progress bar (compat fallback)
-:: Uses Start-BitsTransfer if available, otherwise Invoke-WebRequest
-:: ============================================================================
 :download_with_progress
 set "DL_URL=%~1"
 set "DL_OUT=%~2"
